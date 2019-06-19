@@ -18,6 +18,11 @@ license = "GPL-3.0-or-later"
 crate-type = ["lib"]
 # crate-type = ["bin"]
 
+[features]
+gmp = ["rust-gmp"]
+num = ["num-bigint"]
+default = ["gmp"] 
+
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 rand = "0.6"
 
@@ -30,13 +35,14 @@ serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
 
-num-bigint = {version = "0.2.2" , features = ["serde","rand"]}
-num-integer = "0.1"
-num-traits = "0.2"
-
 bit-vec = "0.6"
 cryptoxide = "0.1.1"
 zeroize = "0.9"
+
+rust-gmp = { version = "0.5.0", features = ["serde_support"], git = "https://github.com/KZen-networks/rust-gmp", optional = true }
+num-bigint = { version = "0.2.2", features = ["serde", "rand"], optional = true }
+num-integer = { version = "0.1"}
+num-traits = { version = "0.2"}
 
 [dependencies.secp256k1]
 version = "0.13.1"

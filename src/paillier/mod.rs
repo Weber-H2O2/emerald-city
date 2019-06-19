@@ -14,7 +14,7 @@ use std::borrow::Cow;
 /// Main struct onto which most operations are added.
 pub struct Paillier;
 
-pub use curv::arithmetic::num_bigint::BigInt;
+pub use curv::arithmetic::BigInt;
 /// Keypair from which encryption and decryption keys can be derived.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Keypair {

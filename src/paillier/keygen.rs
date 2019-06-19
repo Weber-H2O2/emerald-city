@@ -1,7 +1,9 @@
 //! Key generation following standard recommendations.
 
-use curv::arithmetic::num_bigint::BigInt;
+use curv::arithmetic::BigInt;
 use curv::arithmetic::traits::*;
+
+// use gmp::num_traits::{One, Zero};
 use num_traits::{One, Zero};
 use paillier::traits::*;
 use paillier::{Keypair, Paillier};

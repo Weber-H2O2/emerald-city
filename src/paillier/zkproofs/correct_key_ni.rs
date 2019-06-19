@@ -15,8 +15,9 @@
 */
 use std::ops::Shl;
 
-use curv::arithmetic::num_bigint::{from, BigInt};
+use curv::arithmetic::{from, BigInt};
 use curv::arithmetic::traits::*;
+use curv::arithmetic::traits::BitManipulation;
 use curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
 use curv::cryptographic_primitives::hashing::traits::Hash;
 use num_integer::Integer;
@@ -42,7 +43,7 @@ pub struct NICorrectKeyProof {
 impl NICorrectKeyProof {
     pub fn proof(dk: &DecryptionKey) -> NICorrectKeyProof {
         let dk_n = &dk.q * &dk.p;
-        let key_length = &dk_n.bits();
+        let key_length = dk_n.bits();
 
         let salt_bn = from(SALT_STRING);
 

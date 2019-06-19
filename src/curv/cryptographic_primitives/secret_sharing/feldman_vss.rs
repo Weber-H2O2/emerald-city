@@ -6,7 +6,7 @@
     License MIT: <https://github.com/KZen-networks/curv/blob/master/LICENSE>
 */
 
-use curv::arithmetic::num_bigint::BigInt;
+use curv::arithmetic::BigInt;
 use curv::elliptic::curves::secp256_k1::{FE, GE};
 use curv::elliptic::curves::traits::*;
 use num_traits::One;

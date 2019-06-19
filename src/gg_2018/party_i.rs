@@ -26,7 +26,7 @@ use curv::arithmetic::traits::*;
 
 use curv::elliptic::curves::traits::*;
 
-use curv::arithmetic::num_bigint::BigInt;
+use curv::arithmetic::BigInt;
 use curv::cryptographic_primitives::commitments::hash_commitment::HashCommitment;
 use curv::cryptographic_primitives::commitments::traits::Commitment;
 use curv::cryptographic_primitives::hashing::hash_sha256::HSha256;

@@ -5,7 +5,7 @@
     License MIT: <https://github.com/KZen-networks/curv/blob/master/LICENSE>
 */
 
-use curv::arithmetic::num_bigint::BigInt;
+use curv::arithmetic::BigInt;
 use ErrorKey;
 
 pub trait ECScalar<SK> {

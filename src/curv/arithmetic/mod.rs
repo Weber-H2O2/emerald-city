@@ -14,5 +14,23 @@
     @license GPL-3.0+ <https://github.com/KZen-networks/cryptography-utils/blob/master/LICENSE>
 */
 
-pub mod num_bigint;
 pub mod traits;
+mod num_big;
+mod big_gmp;
+
+// #[cfg(feature="num")]
+// pub type BigInt = num_big::BigInt;
+
+//#[cfg(feature="gmp")]
+pub type BigInt = big_gmp::BigInt;
+
+
+pub fn from(bytes: &[u8]) -> BigInt {
+    #[cfg(feature="num")]{
+    BigInt::from_bytes_be(bytes)
+    }
+    #[cfg(feature="gmp")]{
+    BigInt::from(bytes)
+    }
+}
+

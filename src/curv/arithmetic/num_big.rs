@@ -1,3 +1,4 @@
+#![cfg(not(feature="gmp"))]
 use super::traits::*;
 use num_integer::Integer;
 use rand::thread_rng;
@@ -154,7 +155,7 @@ pub fn from(bytes: &[u8]) -> BigInt {
 
 impl BitManipulation for BigUint {
     fn set_bit(&self, bit: usize, bit_val: bool) -> BigUint {
-        let one = BigInt::from(1 as u16);
+        let one = BigInt::from(1 as i32);
         let one_shl = one.shl(bit);
         if bit_val == false {
             return self.bitand(&one_shl);

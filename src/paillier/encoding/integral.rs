@@ -9,7 +9,7 @@ use std::borrow::Borrow;
 use std::marker::PhantomData;
 
 use super::{pack, unpack, EncodedCiphertext};
-use curv::arithmetic::num_bigint::BigInt;
+use curv::arithmetic::BigInt;
 use curv::arithmetic::traits::*;
 use paillier::{Paillier, RawCiphertext, RawPlaintext};
 

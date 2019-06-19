@@ -52,6 +52,7 @@ where
 pub trait BitManipulation {
     fn set_bit(&self, bit: usize, bit_val: bool) -> Self;
     fn test_bit(self: &Self, bit: usize) -> bool;
+    fn bits(self: &Self) -> usize;
 }
 
 pub trait ConvertFrom<T> {

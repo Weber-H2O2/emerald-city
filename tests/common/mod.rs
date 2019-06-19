@@ -20,7 +20,7 @@ pub const BENCH_SAMPLE_SIZE: usize = 10;
 */
 extern crate emerald_city;
 
-use self::emerald_city::curv::arithmetic::num_bigint::from;
+use self::emerald_city::curv::arithmetic::from;
 use self::emerald_city::curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
 
 use self::emerald_city::curv::cryptographic_primitives::hashing::traits::Hash;

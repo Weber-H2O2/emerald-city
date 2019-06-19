@@ -10,15 +10,13 @@
 /// r is 256bit blinding factor, m is the commited value
 pub struct HashCommitment;
 
-use curv::arithmetic::num_bigint::BigInt;
+use curv::arithmetic::*;
 
 use super::traits::Commitment;
 use super::SECURITY_BITS;
 use cryptoxide::digest::Digest;
 use cryptoxide::sha3::Sha3;
-use curv::arithmetic::num_bigint::from;
-use curv::arithmetic::traits::Converter;
-use curv::arithmetic::traits::Samplable;
+use curv::arithmetic::traits::{Converter,Samplable};
 
 //TODO:  using the function with BigInt's as input instead of string's makes it impossible to commit to empty message or use empty randomness
 impl Commitment<BigInt> for HashCommitment {
@@ -54,10 +52,8 @@ mod tests {
     use super::SECURITY_BITS;
     use cryptoxide::digest::Digest;
     use cryptoxide::sha3::Sha3;
-    use curv::arithmetic::num_bigint::from;
-    use curv::arithmetic::num_bigint::BigInt;
-    use curv::arithmetic::traits::Converter;
-    use curv::arithmetic::traits::Samplable;
+    use curv::arithmetic::*;
+    use curv::arithmetic::traits::{Converter, Samplable};
     use num_traits::{One, Zero};
 
     #[cfg(target_arch = "wasm32")]
@@ -120,7 +116,7 @@ mod tests {
         );
         let message2: Vec<u8> = BigInt::to_vec(&message);
         digest.input(&message2);
-        let bytes_blinding_factor: Vec<u8> = (&BigInt::zero()).to_bytes_be();
+        let bytes_blinding_factor: Vec<u8> = BigInt::to_vec(&BigInt::zero()); //.to_bytes_be();
         digest.input(&bytes_blinding_factor);
         let mut result = [0; 32];
         digest.result(&mut result);

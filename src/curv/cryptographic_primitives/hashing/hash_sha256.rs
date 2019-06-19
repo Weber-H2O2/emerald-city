@@ -8,7 +8,8 @@
 use super::traits::Hash;
 use cryptoxide::digest::Digest;
 use cryptoxide::sha2::Sha256;
-use curv::arithmetic::num_bigint::{from, BigInt};
+use curv::arithmetic::{from, BigInt};
+use curv::arithmetic::traits::Converter;
 use curv::elliptic::curves::secp256_k1::{FE, GE};
 use curv::elliptic::curves::traits::{ECPoint, ECScalar};
 
@@ -19,8 +20,14 @@ impl Hash for HSha256 {
         let mut hasher = Sha256::new();
 
         for value in big_ints {
-            let bytes: Vec<u8> = value.to_bytes_be();
-            hasher.input(&bytes);
+            #[cfg(feature="num")]{
+                let bytes: Vec<u8> = value.to_bytes_be();
+                hasher.input(&bytes);
+            }
+            #[cfg(feature="gmp")]{
+                let bytes: Vec<u8> = BigInt::to_vec(value);
+                hasher.input(&bytes);
+            }            
         }
 
         let mut result = [0; 32];
@@ -46,7 +53,7 @@ impl Hash for HSha256 {
 mod tests {
     use super::HSha256;
     use super::Hash;
-    use curv::arithmetic::num_bigint::BigInt;
+    use curv::arithmetic::BigInt;
     use curv::elliptic::curves::secp256_k1::GE;
     use curv::elliptic::curves::traits::ECPoint;
     use curv::elliptic::curves::traits::ECScalar;

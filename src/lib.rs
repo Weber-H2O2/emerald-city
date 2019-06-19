@@ -20,9 +20,6 @@ extern crate serde_derive;
 extern crate serde;
 extern crate serde_json;
 
-extern crate num_bigint;
-extern crate num_integer;
-extern crate num_traits;
 extern crate rand;
 extern crate zeroize;
 
@@ -47,6 +44,16 @@ pub enum ErrorKey {
 pub enum ErrorSS {
     VerifyShareError,
 }
+
+#[cfg(feature="num")]
+extern crate num_bigint;
+// #[cfg(feature="num")]
+extern crate num_integer;
+// #[cfg(feature="num")]
+extern crate num_traits;
+
+#[cfg(feature="gmp")]
+extern crate gmp;
 
 #[cfg(target_arch = "wasm32")]
 extern crate wasm_bindgen;
