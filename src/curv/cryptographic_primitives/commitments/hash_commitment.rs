@@ -16,7 +16,7 @@ use super::traits::Commitment;
 use super::SECURITY_BITS;
 use cryptoxide::digest::Digest;
 use cryptoxide::sha3::Sha3;
-use curv::arithmetic::traits::{Converter,Samplable};
+use curv::arithmetic::traits::{Converter, Samplable};
 
 //TODO:  using the function with BigInt's as input instead of string's makes it impossible to commit to empty message or use empty randomness
 impl Commitment<BigInt> for HashCommitment {
@@ -52,8 +52,8 @@ mod tests {
     use super::SECURITY_BITS;
     use cryptoxide::digest::Digest;
     use cryptoxide::sha3::Sha3;
-    use curv::arithmetic::*;
     use curv::arithmetic::traits::{Converter, Samplable};
+    use curv::arithmetic::*;
     use num_traits::{One, Zero};
 
     #[cfg(target_arch = "wasm32")]

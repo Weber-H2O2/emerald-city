@@ -362,8 +362,7 @@ pub fn sign(t: usize, n: usize, ttag: usize, s: Vec<usize>) {
 
 #[cfg(not(test))]
 fn main() {
-                
-    let t = 1;        
+    let t = 1;
     let n = 4;
 
     // GLOBAL.reset();
@@ -374,8 +373,8 @@ fn main() {
         keygen_t_n_parties(t, n);
         println!("elapsed {:?}", start.elapsed()); // note :?
     }
-                                               //#[allow(unreachable_code)]
-                                               //0
-                                               // For some reason this does not print zero =/
+    //#[allow(unreachable_code)]
+    //0
+    // For some reason this does not print zero =/
     // println!("memory used: {} bytes", GLOBAL.get());
 }

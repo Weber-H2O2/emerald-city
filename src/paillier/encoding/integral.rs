@@ -9,8 +9,8 @@ use std::borrow::Borrow;
 use std::marker::PhantomData;
 
 use super::{pack, unpack, EncodedCiphertext};
-use curv::arithmetic::BigInt;
 use curv::arithmetic::traits::*;
+use curv::arithmetic::BigInt;
 use paillier::{Paillier, RawCiphertext, RawPlaintext};
 
 impl<EK> Encrypt<EK, u64, EncodedCiphertext<u64>> for Paillier

@@ -1,7 +1,7 @@
 //! Key generation following standard recommendations.
 
-use curv::arithmetic::BigInt;
 use curv::arithmetic::traits::*;
+use curv::arithmetic::BigInt;
 
 // use gmp::num_traits::{One, Zero};
 use num_traits::{One, Zero};

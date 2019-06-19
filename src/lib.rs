@@ -45,14 +45,14 @@ pub enum ErrorSS {
     VerifyShareError,
 }
 
-#[cfg(feature="num")]
+#[cfg(feature = "num")]
 extern crate num_bigint;
 // #[cfg(feature="num")]
 extern crate num_integer;
 // #[cfg(feature="num")]
 extern crate num_traits;
 
-#[cfg(feature="gmp")]
+#[cfg(not(feature = "num"))]
 extern crate gmp;
 
 #[cfg(target_arch = "wasm32")]

@@ -15,9 +15,9 @@
 */
 use std::ops::Shl;
 
-use curv::arithmetic::{from, BigInt};
-use curv::arithmetic::traits::*;
 use curv::arithmetic::traits::BitManipulation;
+use curv::arithmetic::traits::*;
+use curv::arithmetic::{from, BigInt};
 use curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
 use curv::cryptographic_primitives::hashing::traits::Hash;
 use num_integer::Integer;

@@ -23,8 +23,8 @@ use super::secp256k1::constants::{
 use super::secp256k1::{PublicKey, Secp256k1, SecretKey};
 use super::traits::{ECPoint, ECScalar};
 use curv::arithmetic::from;
-use curv::arithmetic::BigInt;
 use curv::arithmetic::traits::{Converter, Modulo};
+use curv::arithmetic::BigInt;
 use curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
 use curv::cryptographic_primitives::hashing::traits::Hash;
 use num_traits::Num;
@@ -126,7 +126,7 @@ impl ECScalar<SK> for Secp256k1Scalar {
 
     fn from(n: &BigInt) -> Secp256k1Scalar {
         let curve_order = FE::q();
-        let n_reduced = BigInt::mod_add(n, &BigInt::from(0 as i32), &curve_order);
+        let n_reduced = BigInt::mod_add(n, &BigInt::from(0 as u32), &curve_order);
         let mut v = BigInt::to_vec(&n_reduced);
 
         if v.len() < SECRET_KEY_SIZE {
@@ -561,9 +561,9 @@ impl<'de> Visitor<'de> for Secp256k1PointVisitor {
 }
 #[cfg(test)]
 mod tests {
-    use curv::arithmetic::BigInt;
     use curv::arithmetic::traits::Converter;
     use curv::arithmetic::traits::Modulo;
+    use curv::arithmetic::BigInt;
     use curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
     use curv::cryptographic_primitives::hashing::traits::Hash;
     use curv::elliptic::curves::secp256_k1::Secp256k1Point;

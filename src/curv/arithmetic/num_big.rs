@@ -1,10 +1,10 @@
-#![cfg(not(feature="gmp"))]
+#![cfg(feature="num")]
 use super::traits::*;
 use num_integer::Integer;
 use rand::thread_rng;
 
-use num_bigint::BigUint;
 use num_bigint::BigInt as BN;
+use num_bigint::BigUint;
 use num_bigint::RandBigInt;
 use num_bigint::ToBigInt;
 
@@ -148,14 +148,16 @@ impl<'a> ConvertFrom<&'a [u8]> for BigUint {
     }
 }
 */
-
+/*
+#[inline]
 pub fn from(bytes: &[u8]) -> BigInt {
     BigInt::from_bytes_be(bytes)
 }
+*/
 
 impl BitManipulation for BigUint {
     fn set_bit(&self, bit: usize, bit_val: bool) -> BigUint {
-        let one = BigInt::from(1 as i32);
+        let one = BigInt::from(1 as u16);
         let one_shl = one.shl(bit);
         if bit_val == false {
             return self.bitand(&one_shl);
@@ -166,6 +168,11 @@ impl BitManipulation for BigUint {
 
     fn test_bit(self: &Self, _bit: usize) -> bool {
         return true; //stub
+    }
+
+    #[inline]
+    fn bits(self: &Self) -> usize {
+        self.bits()
     }
 }
 
@@ -208,9 +215,7 @@ impl<'de> Visitor<'de> for BigUintVisitor {
 
 impl Converter for BigUint {
     fn to_vec(value: &BigUint) -> Vec<u8> {
-        let bytes: Vec<u8> = value.to_bytes_be();
-
-        bytes
+        value.to_bytes_be()
     }
 
     fn to_hex(&self) -> String {

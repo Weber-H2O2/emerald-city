@@ -1,4 +1,4 @@
-#![cfg(feature="gmp")]
+#![cfg(not(feature = "num"))]
 
 /*
     Curv
@@ -16,12 +16,12 @@
     @license GPL-3.0+ <https://github.com/KZen-networks/curv/blob/master/LICENSE>
 */
 
-use gmp::mpz::Mpz;
-use rand::rngs::OsRng;
-use rand::RngCore;
 use super::traits::{
     BitManipulation, ConvertFrom, Converter, Modulo, NumberTests, Samplable, EGCD,
 };
+use gmp::mpz::Mpz;
+use rand::rngs::OsRng;
+use rand::RngCore;
 
 use std::borrow::Borrow;
 
@@ -150,6 +150,7 @@ impl BitManipulation for Mpz {
         self.tstbit(bit)
     }
 
+    #[inline]
     fn bits(self: &Self) -> usize {
         self.bit_length()
     }
