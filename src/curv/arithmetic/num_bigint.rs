@@ -1,11 +1,12 @@
 use super::traits::*;
-use num_bigint::BigUint;
 use num_integer::Integer;
 use rand::thread_rng;
 
+use num_bigint::BigUint;
 use num_bigint::BigInt as BN;
 use num_bigint::RandBigInt;
 use num_bigint::ToBigInt;
+
 use num_traits::cast::ToPrimitive;
 use num_traits::identities::Zero;
 use num_traits::Num;

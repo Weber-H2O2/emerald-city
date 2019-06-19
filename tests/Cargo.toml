@@ -1,0 +1,28 @@
+[package]
+name = "emerald-city-common"
+version = "0.2.1"
+
+authors = [
+    "Omer <omer@kzencorp.com>"
+]
+description = "Test common API for WASM/HW-friendly lightweight client application for threshold ECDSA"
+homepage = "https://github.com/KZen-networks"
+repository = "https://github.com/KZen-networks/emerald-city"
+license = "GPL-3.0-or-later"
+
+
+[lib]
+# crate-type = ["bin", "staticlib", "lib", "cdylib"]
+# crate-type = ["staticlib"]
+# crate-type = ["staticlib", "lib", "cdylib"]
+crate-type = ["lib"]
+# crate-type = ["bin"]
+path = "lib.rs"
+
+[dependencies]
+emerald-city = { version = "0.2.1", path = "../" }
+trallocator = { path = "../trallocator" }
+
+[[bin]]
+name="bn1"
+path="common/mod.rs"
