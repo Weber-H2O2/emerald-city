@@ -363,7 +363,7 @@ pub fn sign(t: usize, n: usize, ttag: usize, s: Vec<usize>) {
 #[cfg(not(test))]
 fn main() {
     let t = 1;
-    let n = 4;
+    let n = 2;
 
     // GLOBAL.reset();
     println!("running keygen (t={},n={})", t, n);

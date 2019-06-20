@@ -15,7 +15,9 @@ license = "GPL-3.0-or-later"
 # crate-type = ["bin", "staticlib", "lib", "cdylib"]
 # crate-type = ["staticlib"]
 # crate-type = ["staticlib", "lib", "cdylib"]
-crate-type = ["lib"]
+crate-type = ["staticlib", "lib"]
+# crate-type = ["dylib"]
+# crate-type = ["lib"]
 # crate-type = ["bin"]
 path = "lib.rs"
 
