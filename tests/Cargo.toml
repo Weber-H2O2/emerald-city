@@ -23,6 +23,7 @@ path = "lib.rs"
 
 [dependencies]
 emerald-city = { version = "0.2.1", path = "../" }
+# multi-party-ecdsa = { version = "0.1", path = "C:/Projects/Repos/kzen/KZen-networks/multi-party-ecdsa" }
 trallocator = { path = "../trallocator" }
 
 [[bin]]

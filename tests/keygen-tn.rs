@@ -56,7 +56,7 @@ pub mod bench {
     config = Criterion::default().sample_size(super::common::BENCH_SAMPLE_SIZE);
     targets =
     self::bench_full_keygen_party_one_two,
-    self::bench_full_keygen_party_two_three
+    //self::bench_full_keygen_party_two_three
     }
 }
 

@@ -60,6 +60,9 @@ wasm-bindgen-test = "0.2"
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
 criterion = "0.2"
 
+[patch."https://github.com/KZen-networks/rust-gmp"]
+rust-gmp = { path="C:/Projects/Repos/rust-gmp_kzen" }
+
 [[bench]]
 name = "keygen"
 path = "tests/keygen-tn.rs"
