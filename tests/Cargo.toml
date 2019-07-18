@@ -29,3 +29,6 @@ trallocator = { path = "../trallocator" }
 [[bin]]
 name="bn1"
 path="common/mod.rs"
+
+[patch."https://github.com/vhnatyk/rust-secp256k1"]
+secp256k1 = { version = "0.13.1", features = ["rand", "serde"], path="C:/Projects/Repos/rust-secp256k1" }
