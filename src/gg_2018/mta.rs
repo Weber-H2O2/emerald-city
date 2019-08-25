@@ -24,11 +24,11 @@ use paillier::{DecryptionKey, EncryptionKey, Paillier, RawCiphertext, RawPlainte
 use gg_2018::party_i::PartyPrivate;
 use Error::{self, InvalidKey};
 
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct MessageA {
     pub c: BigInt, // paillier encryption
 }
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct MessageB {
     pub c: BigInt, // paillier encryption
     pub b_proof: DLogProof,
