@@ -1,17 +1,17 @@
 //! Integral code supporting both scalars and vectors.
 
-use paillier::traits::Add;
-use paillier::traits::Decrypt;
-use paillier::traits::Encrypt;
-use paillier::traits::Mul;
-use paillier::traits::Rerandomize;
+use crate::paillier::traits::Add;
+use crate::paillier::traits::Decrypt;
+use crate::paillier::traits::Encrypt;
+use crate::paillier::traits::Mul;
+use crate::paillier::traits::Rerandomize;
 use std::borrow::Borrow;
 use std::marker::PhantomData;
 
 use super::{pack, unpack, EncodedCiphertext};
-use curv::arithmetic::num_bigint::BigInt;
-use curv::arithmetic::traits::*;
-use paillier::{Paillier, RawCiphertext, RawPlaintext};
+use crate::curv::arithmetic::num_bigint::BigInt;
+use crate::curv::arithmetic::traits::*;
+use crate::paillier::{Paillier, RawCiphertext, RawPlaintext};
 
 impl<EK> Encrypt<EK, u64, EncodedCiphertext<u64>> for Paillier
 where

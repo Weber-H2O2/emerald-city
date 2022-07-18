@@ -2,8 +2,8 @@
 
 use std::marker::PhantomData;
 
-use curv::arithmetic::num_bigint::BigInt;
-use curv::arithmetic::traits::ConvertFrom;
+use crate::curv::arithmetic::num_bigint::BigInt;
+use crate::curv::arithmetic::traits::ConvertFrom;
 pub mod integral;
 use num_traits::One;
 

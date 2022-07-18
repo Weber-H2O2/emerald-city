@@ -19,14 +19,14 @@
 use super::rand::{thread_rng, Rng};
 use super::secp256k1::{PublicKey, SecretKey};
 use super::traits::{ECPoint, ECScalar};
-use curv::arithmetic::num_bigint::from;
-use curv::arithmetic::num_bigint::BigInt;
-use curv::arithmetic::traits::{Converter, Modulo};
-use curv::cryptographic_primitives::hashing::constants::{
+use crate::curv::arithmetic::num_bigint::from;
+use crate::curv::arithmetic::num_bigint::BigInt;
+use crate::curv::arithmetic::traits::{Converter, Modulo};
+use crate::curv::cryptographic_primitives::hashing::constants::{
     CURVE_ORDER, GENERATOR_X, GENERATOR_Y, SECRET_KEY_SIZE, UNCOMPRESSED_PUBLIC_KEY_SIZE,
 };
-use curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
-use curv::cryptographic_primitives::hashing::traits::Hash;
+use crate::curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
+use crate::curv::cryptographic_primitives::hashing::traits::Hash;
 use num_traits::Num;
 use serde::de;
 use serde::de::{MapAccess, Visitor};
@@ -41,7 +41,7 @@ use zeroize::Zeroize;
 
 use super::secp256k1::curve::Scalar;
 
-use ErrorKey;
+use crate::ErrorKey;
 pub type SK = SecretKey;
 pub type PK = PublicKey;
 
@@ -320,7 +320,7 @@ impl ECPoint<PK, SK> for Secp256k1Point {
     /// 2) remove first byte [1..33]
     /// 3) call from_bytes
     fn bytes_compressed_to_big_int(&self) -> BigInt {
-        let mut serial = self.ge.serialize();
+        let serial = self.ge.serialize();
         let y_coor_last_byte = serial[64].clone();
         let y_coor_parity = (y_coor_last_byte << 7) >> 7;
         let mut compressed = vec![2 + y_coor_parity];
@@ -349,7 +349,7 @@ impl ECPoint<PK, SK> for Secp256k1Point {
 
         let byte_len = bytes_vec.len();
         match byte_len {
-            33...63 => {
+            33..=63 => {
                 let mut template = vec![0; 64 - bytes_vec.len()];
                 template.extend_from_slice(&bytes);
                 let bytes_vec = template;
@@ -366,7 +366,7 @@ impl ECPoint<PK, SK> for Secp256k1Point {
                 test.map_err(|_err| ErrorKey::InvalidPublicKey)
             }
 
-            0...32 => {
+            0..=32 => {
                 let mut template = vec![0; 32 - bytes_vec.len()];
                 template.extend_from_slice(&bytes);
                 let bytes_vec = template;

@@ -1,10 +1,10 @@
 //! Key generation following standard recommendations.
 
-use curv::arithmetic::num_bigint::BigInt;
-use curv::arithmetic::traits::*;
+use crate::curv::arithmetic::num_bigint::BigInt;
+use crate::curv::arithmetic::traits::*;
 use num_traits::{One, Zero};
-use paillier::traits::*;
-use paillier::{Keypair, Paillier};
+use crate::paillier::traits::*;
+use crate::paillier::{Keypair, Paillier};
 impl KeyGeneration<Keypair> for Paillier {
     fn keypair_with_modulus_size(bit_length: usize) -> Keypair {
         let p = BigInt::sample_prime(bit_length / 2);
@@ -54,7 +54,7 @@ impl PrimeSampable for BigInt {
 // 3. Run five rounds of the Miller-Rabin test on the candidate.
 fn is_prime(candidate: &BigInt) -> bool {
     // First, simple trial divide
-    for p in SMALL_PRIMES.into_iter() {
+    for p in SMALL_PRIMES.iter() {
         let prime = BigInt::from(*p);
         let r = candidate % &prime;
         if !NumberTests::is_zero(&r) {

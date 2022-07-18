@@ -6,11 +6,11 @@
 */
 
 use super::ProofError;
-use curv::elliptic::curves::secp256_k1::{FE, GE};
-use curv::elliptic::curves::traits::*;
+use crate::curv::elliptic::curves::secp256_k1::{FE, GE};
+use crate::curv::elliptic::curves::traits::*;
 
-use curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
-use curv::cryptographic_primitives::hashing::traits::Hash;
+use crate::curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
+use crate::curv::cryptographic_primitives::hashing::traits::Hash;
 use zeroize::Zeroize;
 
 /// This is implementation of Schnorr's identification protocol for elliptic curve groups or a

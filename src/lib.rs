@@ -26,10 +26,15 @@ extern crate rand;
 extern crate zeroize;
 
 extern crate cryptoxide;
+extern crate reqwest;
+extern crate sha2;
+extern crate aes_gcm;
 
 pub mod curv;
 pub mod gg_2018;
 pub mod paillier;
+pub mod common;
+pub mod api;
 
 #[derive(Copy, PartialEq, Eq, Clone, Debug)]
 pub enum Error {
@@ -49,6 +54,9 @@ pub enum ErrorSS {
 
 #[cfg(target_arch = "wasm32")]
 extern crate wasm_bindgen;
+
+#[cfg(target_arch = "wasm32")]
+extern crate wasm_bindgen_futures;
 
 #[cfg(all(test, target_arch = "wasm32"))]
 extern crate wasm_bindgen_test;

@@ -13,16 +13,16 @@
 
     @license GPL-3.0+ <https://github.com/KZen-networks/multi-party-ecdsa/blob/master/LICENSE>
 */
-use curv::arithmetic::num_bigint::BigInt;
-use curv::arithmetic::traits::Samplable;
-use curv::cryptographic_primitives::proofs::sigma_dlog::{DLogProof, ProveDLog};
-use curv::elliptic::curves::secp256_k1::{FE, GE};
-use curv::elliptic::curves::traits::*;
-use paillier::{Add, Decrypt, Encrypt, Mul};
-use paillier::{DecryptionKey, EncryptionKey, Paillier, RawCiphertext, RawPlaintext};
+use crate::curv::arithmetic::num_bigint::BigInt;
+use crate::curv::arithmetic::traits::Samplable;
+use crate::curv::cryptographic_primitives::proofs::sigma_dlog::{DLogProof, ProveDLog};
+use crate::curv::elliptic::curves::secp256_k1::{FE, GE};
+use crate::curv::elliptic::curves::traits::*;
+use crate::paillier::{Add, Decrypt, Encrypt, Mul};
+use crate::paillier::{DecryptionKey, EncryptionKey, Paillier, RawCiphertext, RawPlaintext};
 
-use gg_2018::party_i::PartyPrivate;
-use Error::{self, InvalidKey};
+use crate::gg_2018::party_i::PartyPrivate;
+use crate::Error::{self, InvalidKey};
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct MessageA {
