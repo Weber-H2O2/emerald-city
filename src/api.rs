@@ -34,7 +34,7 @@ pub async fn signup(client: &Client) -> Result<PartySignup, ()> {
 }
 
 #[wasm_bindgen]
-pub async fn gg18_keygen(t: usize, n: usize, save_path: &str) {
+pub async fn gg18_keygen(t: usize, n: usize, save_path: String) {
     let client = reqwest::Client::new();
     let delay = time::Duration::from_millis(25);
     let params = Parameters {
