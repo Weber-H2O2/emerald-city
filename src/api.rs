@@ -33,8 +33,9 @@ pub async fn signup(client: &Client) -> Result<PartySignup, ()> {
     serde_json::from_str(&res_body).unwrap()
 }
 
-
-pub async fn gg18_keygen(client: &mut Client, t: usize, n: usize, save_path: &str) {
+#[wasm_bindgen]
+pub async fn gg18_keygen(t: usize, n: usize, save_path: &str) {
+    let client = reqwest::Client::new();
     let delay = time::Duration::from_millis(25);
     let params = Parameters {
         threshold: t,
