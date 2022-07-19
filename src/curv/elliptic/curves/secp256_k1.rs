@@ -587,18 +587,18 @@ impl<'de> Visitor<'de> for Secp256k1PointVisitor {
 }
 #[cfg(test)]
 mod tests {
-    use curv::arithmetic::num_bigint::BigInt;
-    use curv::arithmetic::traits::Converter;
-    use curv::arithmetic::traits::Modulo;
-    use curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
-    use curv::cryptographic_primitives::hashing::traits::Hash;
-    use curv::elliptic::curves::secp256_k1::Secp256k1Point;
-    use curv::elliptic::curves::secp256_k1::Secp256k1Scalar;
-    use curv::elliptic::curves::secp256_k1::{FE, GE};
-    use curv::elliptic::curves::traits::ECPoint;
-    use curv::elliptic::curves::traits::ECScalar;
+    use crate::curv::arithmetic::num_bigint::BigInt;
+    use crate::curv::arithmetic::traits::Converter;
+    use crate::curv::arithmetic::traits::Modulo;
+    use crate::curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
+    use crate::curv::cryptographic_primitives::hashing::traits::Hash;
+    use crate::curv::elliptic::curves::secp256_k1::Secp256k1Point;
+    use crate::curv::elliptic::curves::secp256_k1::Secp256k1Scalar;
+    use crate::curv::elliptic::curves::secp256_k1::{FE, GE};
+    use crate::curv::elliptic::curves::traits::ECPoint;
+    use crate::curv::elliptic::curves::traits::ECScalar;
     use serde_json;
-    use ErrorKey;
+    use crate::ErrorKey;
 
     #[cfg(target_arch = "wasm32")]
     use wasm_bindgen_test::*;

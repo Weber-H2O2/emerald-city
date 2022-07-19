@@ -2,6 +2,7 @@
 
 use wasm_bindgen::prelude::*;
 
+
 use crate::gg_2018::mta::*;
 use crate::gg_2018::party_i::*;
 use reqwest::Client;
@@ -21,6 +22,9 @@ use crate::paillier::EncryptionKey;
 use sha2::Sha256;
 use std::{env, fs, time};
 
+use crate::log;
+use crate::console_log;
+
 use crate::common::{
     aes_decrypt, aes_encrypt, broadcast, poll_for_broadcasts, poll_for_p2p, postb, sendp2p, Params,
     PartySignup, AEAD, AES_KEY_BYTES_LEN,
@@ -29,7 +33,9 @@ use crate::common::{
 pub async fn signup(client: &Client) -> Result<PartySignup, ()> {
     let key = "signup-keygen".to_string();
 
+    console_log!("key {}", key);
     let res_body = postb(client, "signupkeygen", key).await.unwrap();
+    console_log!("response body {}", res_body);
     serde_json::from_str(&res_body).unwrap()
 }
 
@@ -44,12 +50,14 @@ pub async fn gg18_keygen(t: usize, n: usize, save_path: String) {
 
     let PARTIES = n.clone() as u16;
 
+    console_log!("signup");
     let (party_num_int, uuid) = match signup(&client).await.unwrap() {
         PartySignup {number, uuid} => (number, uuid),
     };
 
     let party_keys = Keys::create(party_num_int as usize);
     let (bc_i, decom_i) = party_keys.phase1_broadcast_phase3_proof_of_correct_key();
+    console_log!("broadcast");
     assert!(broadcast(
             &client,
             party_num_int,

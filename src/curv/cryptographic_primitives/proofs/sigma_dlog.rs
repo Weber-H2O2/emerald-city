@@ -88,8 +88,8 @@ impl ProveDLog for DLogProof {
 
 #[cfg(test)]
 mod tests {
-    use curv::cryptographic_primitives::proofs::sigma_dlog::*;
-    use curv::elliptic::curves::secp256_k1::FE;
+    use crate::curv::cryptographic_primitives::proofs::sigma_dlog::*;
+    use crate::curv::elliptic::curves::secp256_k1::FE;
 
     #[cfg(target_arch = "wasm32")]
     use wasm_bindgen_test::*;

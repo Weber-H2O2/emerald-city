@@ -241,8 +241,8 @@ impl VerifiableSS {
 
 #[cfg(test)]
 mod tests {
-    use curv::cryptographic_primitives::secret_sharing::feldman_vss::*;
-    use curv::elliptic::curves::secp256_k1::{FE, GE};
+    use crate::curv::cryptographic_primitives::secret_sharing::feldman_vss::*;
+    use crate::curv::elliptic::curves::secp256_k1::{FE, GE};
 
     #[cfg(target_arch = "wasm32")]
     use wasm_bindgen_test::*;

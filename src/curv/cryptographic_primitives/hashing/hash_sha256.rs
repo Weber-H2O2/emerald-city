@@ -46,10 +46,10 @@ impl Hash for HSha256 {
 mod tests {
     use super::HSha256;
     use super::Hash;
-    use curv::arithmetic::num_bigint::BigInt;
-    use curv::elliptic::curves::secp256_k1::GE;
-    use curv::elliptic::curves::traits::ECPoint;
-    use curv::elliptic::curves::traits::ECScalar;
+    use crate::curv::arithmetic::num_bigint::BigInt;
+    use crate::curv::elliptic::curves::secp256_k1::GE;
+    use crate::curv::elliptic::curves::traits::ECPoint;
+    use crate::curv::elliptic::curves::traits::ECScalar;
     use num_traits::{One, Zero};
 
     #[cfg(target_arch = "wasm32")]

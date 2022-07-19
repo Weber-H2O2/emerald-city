@@ -108,8 +108,8 @@ pub fn mask_generation(out_length: &usize, seed: &BigInt) -> BigInt {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use paillier::KeyGeneration;
-    use paillier::Paillier;
+    use crate::paillier::KeyGeneration;
+    use crate::paillier::Paillier;
 
     #[cfg(target_arch = "wasm32")]
     use wasm_bindgen_test::*;

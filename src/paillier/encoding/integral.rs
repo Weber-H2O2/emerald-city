@@ -324,7 +324,7 @@ where
 mod tests {
 
     use super::*;
-    use paillier::Keypair;
+    use crate::paillier::Keypair;
 
     #[cfg(target_arch = "wasm32")]
     use wasm_bindgen_test::*;

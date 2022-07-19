@@ -51,6 +51,7 @@ pub struct Params {
     pub threshold: String,
 }
 
+
 #[allow(dead_code)]
 pub fn aes_encrypt(key: &[u8], plaintext: &[u8]) -> AEAD {
     let aes_key = aes_gcm::Key::from_slice(key);
@@ -87,7 +88,7 @@ where
 {
     let addr = env::args()
         .nth(1)
-        .unwrap_or_else(|| "http://127.0.0.1:8001".to_string());
+        .unwrap_or_else(|| "http://127.0.0.1:8000".to_string());
     let retries = 3;
     let retry_delay = time::Duration::from_millis(250);
     for _i in 1..retries {
@@ -96,7 +97,7 @@ where
             .json(&body)
             .send().await;
 
-        if let Ok(mut res2) = res {
+        if let Ok(res2) = res {
             return Some(res2.text().await.unwrap());
         }
         thread::sleep(retry_delay);
