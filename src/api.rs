@@ -71,6 +71,7 @@ pub async fn gg18_keygen(t: usize, n: usize, save_path: String) {
             uuid.clone()
     ).await.is_ok());
 
+    console_log!("poll_for_broadcasts");
     let round1_ans_vec = poll_for_broadcasts(
         &client,
         party_num_int,
@@ -87,6 +88,7 @@ pub async fn gg18_keygen(t: usize, n: usize, save_path: String) {
 
     bc1_vec.insert(party_num_int as usize - 1, bc_i);
 
+    console_log!("broadcast round 2");
     // send ephemeral public keys and check commitments correctness
     assert!(broadcast(
             &client,
@@ -95,6 +97,7 @@ pub async fn gg18_keygen(t: usize, n: usize, save_path: String) {
             serde_json::to_string(&decom_i).unwrap(),
             uuid.clone()
     ).await.is_ok());
+    console_log!("poll_for_broadcasts round 2");
     let round2_ans_vec = poll_for_broadcasts(
         &client,
         party_num_int,
@@ -130,6 +133,7 @@ pub async fn gg18_keygen(t: usize, n: usize, save_path: String) {
     let (head, tail) = point_vec.split_at(1);
     let y_sum = tail.iter().fold(head[0].clone(), |acc, x| acc + x);
 
+    console_log!("phase1_verify_com_phase3_verify_correct_key_phase2_distribute");
     let (vss_scheme, secret_shares, _index) = party_keys
         .phase1_verify_com_phase3_verify_correct_key_phase2_distribute(
             &params, &decom_vec, &bc1_vec,
@@ -157,6 +161,7 @@ pub async fn gg18_keygen(t: usize, n: usize, save_path: String) {
         }
     }
 
+    console_log!("poll_for_p2p");
     let round3_ans_vec = poll_for_p2p(
         &client,
         party_num_int,
@@ -184,6 +189,7 @@ pub async fn gg18_keygen(t: usize, n: usize, save_path: String) {
     }
 
     // round 4: send vss commitments
+    console_log!("broadcast round 4");
     assert!(broadcast(
             &client,
             party_num_int,
@@ -191,6 +197,7 @@ pub async fn gg18_keygen(t: usize, n: usize, save_path: String) {
             serde_json::to_string(&vss_scheme).unwrap(),
             uuid.clone()
     ).await.is_ok());
+    console_log!("poll_for_broadcasts round 4");
     let round4_ans_vec = poll_for_broadcasts(
         &client,
         party_num_int,
@@ -213,6 +220,7 @@ pub async fn gg18_keygen(t: usize, n: usize, save_path: String) {
         }
     }
 
+    console_log!("phase2_verify_vss_construct_keypair_phase3_pok_dlog");
     let (shared_keys, dlog_proof) = party_keys
         .phase2_verify_vss_construct_keypair_phase3_pok_dlog(
             &params,
@@ -260,7 +268,8 @@ pub async fn gg18_keygen(t: usize, n: usize, save_path: String) {
             vss_scheme_vec,
             paillier_key_vec,
             y_sum,
-    ))
-        .unwrap();
-    fs::write(save_path, keygen_json).expect("Unable to save !");
+    )).unwrap();
+    console_log!("save {} to {}", keygen_json, save_path);
+
+    //fs::write(save_path, keygen_json).expect("Unable to save !");
 }
