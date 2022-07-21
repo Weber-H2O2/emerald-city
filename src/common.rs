@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use std::{env, thread, time, time::Duration};
+//use std::{env, time, time::Duration};
 //use super::secp256k1::{Message, PublicKey, SECP256K1};
 
 use crate::gg_2018::party_i::Signature;
@@ -8,13 +8,19 @@ use aes_gcm::aead::{Aead, NewAead};
 use aes_gcm::{Aes256Gcm, Nonce};
 use rand::{rngs::OsRng, RngCore};
 
+use wasm_bindgen::JsCast;
+use wasm_bindgen_futures::JsFuture;
+use wasm_bindgen::JsValue;
+
+use crate::log;
+
 use crate::curv::{
     arithmetic::traits::Converter,
     elliptic::curves::{secp256_k1::{Secp256k1Point as Point, Secp256k1Scalar as Scalar}},
     arithmetic::num_bigint::BigInt,
 };
 
-use reqwest::Client;
+use reqwest::{Client, Body};
 use serde::{Deserialize, Serialize};
 
 pub type Key = String;
@@ -82,25 +88,33 @@ pub fn aes_decrypt(key: &[u8], aead_pack: AEAD) -> Vec<u8> {
     out.unwrap()
 }
 
+use reqwest::header::{HeaderMap, HeaderValue, CONTENT_TYPE};
+
 pub async fn postb<T>(client: &Client, path: &str, body: T) -> Option<String>
 where
     T: serde::ser::Serialize,
 {
-    let addr = env::args()
-        .nth(1)
-        .unwrap_or_else(|| "http://127.0.0.1:8000".to_string());
+    let addr = "http://127.0.0.1:8000".to_string();
     let retries = 3;
-    let retry_delay = time::Duration::from_millis(250);
-    for _i in 1..retries {
-        let res = client
-            .post(&format!("{}/{}", addr, path))
-            .json(&body)
-            .send().await;
+    let url = format!("{}/{}", addr, path);
 
-        if let Ok(res2) = res {
-            return Some(res2.text().await.unwrap());
-        }
-        thread::sleep(retry_delay);
+    let mut headers = HeaderMap::new();
+    headers.insert("Content-Type", HeaderValue::from_static("Content-Type:application/json; charset=utf-8"));
+    headers.insert("Accept", HeaderValue::from_static("application/json; charset=utf-8"));
+
+    let client = reqwest::Client::builder()
+        .default_headers(headers)
+        .build().unwrap();
+
+    let mut res = client.post(url)
+        .header("Content-Type", "application/json; charset=utf-8")
+        .json(&body)
+        .send().await;
+
+    if let Ok(mut res) = res {
+        return Some(res.text().await.unwrap())
+    } else {
+        crate::console_log!("res: {:?}", res);
     }
     None
 }
@@ -139,7 +153,7 @@ pub async fn poll_for_broadcasts(
     client: &Client,
     party_num: u16,
     n: u16,
-    delay: Duration,
+    //delay: Duration,
     round: &str,
     sender_uuid: String,
 ) -> Vec<String> {
@@ -150,7 +164,7 @@ pub async fn poll_for_broadcasts(
             let index = Index { key };
             loop {
                 // add delay to allow the server to process request:
-                thread::sleep(delay);
+                //thread::sleep(delay);
                 let res_body = postb(client, "get", index.clone()).await.unwrap();
                 let answer: Result<Entry, ()> = serde_json::from_str(&res_body).unwrap();
                 if let Ok(answer) = answer {
@@ -168,7 +182,7 @@ pub async fn poll_for_p2p(
     client: &Client,
     party_num: u16,
     n: u16,
-    delay: Duration,
+    //delay: Duration,
     round: &str,
     sender_uuid: String,
 ) -> Vec<String> {
@@ -179,7 +193,7 @@ pub async fn poll_for_p2p(
             let index = Index { key };
             loop {
                 // add delay to allow the server to process request:
-                thread::sleep(delay);
+                //thread::sleep(delay);
                 let res_body = postb(client, "get", index.clone()).await.unwrap();
                 let answer: Result<Entry, ()> = serde_json::from_str(&res_body).unwrap();
                 if let Ok(answer) = answer {

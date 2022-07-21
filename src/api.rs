@@ -1,6 +1,11 @@
 #![cfg(target_arch = "wasm32")]
 
+use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
+
+use wasm_bindgen::JsCast;
+use wasm_bindgen_futures::JsFuture;
+use web_sys::{Request, RequestInit, RequestMode, Response};
 
 
 use crate::gg_2018::mta::*;
@@ -20,14 +25,14 @@ use crate::curv::elliptic::curves::traits::{ECPoint, ECScalar};
 
 use crate::paillier::EncryptionKey;
 use sha2::Sha256;
-use std::{env, fs, time};
+use std::{fs, time};
 
 use crate::log;
 use crate::console_log;
 
 use crate::common::{
     aes_decrypt, aes_encrypt, broadcast, poll_for_broadcasts, poll_for_p2p, postb, sendp2p, Params,
-    PartySignup, AEAD, AES_KEY_BYTES_LEN,
+    PartySignup, AEAD, AES_KEY_BYTES_LEN, Entry,
 };
 
 pub async fn signup(client: &Client) -> Result<PartySignup, ()> {
@@ -42,7 +47,7 @@ pub async fn signup(client: &Client) -> Result<PartySignup, ()> {
 #[wasm_bindgen]
 pub async fn gg18_keygen(t: usize, n: usize, save_path: String) {
     let client = reqwest::Client::new();
-    let delay = time::Duration::from_millis(25);
+    //let delay = time::Duration::from_millis(25);
     let params = Parameters {
         threshold: t,
         share_count: n.clone(),
@@ -70,7 +75,7 @@ pub async fn gg18_keygen(t: usize, n: usize, save_path: String) {
         &client,
         party_num_int,
         PARTIES,
-        delay,
+        //delay,
         "round1",
         uuid.clone(),
     ).await;
@@ -94,7 +99,7 @@ pub async fn gg18_keygen(t: usize, n: usize, save_path: String) {
         &client,
         party_num_int,
         PARTIES,
-        delay,
+        //delay,
         "round2",
         uuid.clone(),
     ).await;
@@ -156,7 +161,7 @@ pub async fn gg18_keygen(t: usize, n: usize, save_path: String) {
         &client,
         party_num_int,
         PARTIES,
-        delay,
+        //delay,
         "round3",
         uuid.clone(),
     ).await;
@@ -190,7 +195,7 @@ pub async fn gg18_keygen(t: usize, n: usize, save_path: String) {
         &client,
         party_num_int,
         PARTIES,
-        delay,
+        //delay,
         "round4",
         uuid.clone(),
     ).await;
@@ -227,7 +232,7 @@ pub async fn gg18_keygen(t: usize, n: usize, save_path: String) {
             uuid.clone()
     ).await.is_ok());
     let round5_ans_vec =
-        poll_for_broadcasts(&client, party_num_int, PARTIES, delay, "round5", uuid).await;
+        poll_for_broadcasts(&client, party_num_int, PARTIES, /*delay,*/ "round5", uuid).await;
 
     let mut j = 0;
     let mut dlog_proof_vec: Vec<DLogProof> = Vec::new();
