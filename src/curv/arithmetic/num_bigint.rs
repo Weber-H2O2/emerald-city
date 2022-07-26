@@ -18,7 +18,7 @@ mod ring_algorithms;
 /// very limited API that allows easily switching between implementations.
 ///
 /// Set of traits implemented on BigInt remains the same regardless of underlying implementation.
-#[derive(PartialOrd, PartialEq, Ord, Eq, Clone)]
+#[derive(PartialOrd, PartialEq, Ord, Eq, Clone, Serialize, Deserialize)]
 pub struct BigInt {
     num: BN,
 }
