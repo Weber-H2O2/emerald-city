@@ -56,7 +56,7 @@ pub async fn gg18_keygen(t: usize, n: usize, save_path: String) {
     };
 
     let PARTIES = n.clone() as u16;
-
+&[]
     console_log!("signup");
     let (party_num_int, uuid) = match signup(&client).await.unwrap() {
         PartySignup {number, uuid} => (number, uuid),
@@ -124,7 +124,7 @@ pub async fn gg18_keygen(t: usize, n: usize, save_path: String) {
             let key_bn: BigInt = (decom_j.y_i.clone() * party_keys.u_i.clone())
                 .x_coor()
                 .unwrap();
-            let key_bytes = BigInt::to_vec(&key_bn);
+            let key_bytes = BigInt::to_bytes(&key_bn);
             let mut template: Vec<u8> = vec![0u8; AES_KEY_BYTES_LEN - key_bytes.len()];
             template.extend_from_slice(&key_bytes[..]);
             enc_keys.push(template);
@@ -149,7 +149,7 @@ pub async fn gg18_keygen(t: usize, n: usize, save_path: String) {
         if i != party_num_int {
             // prepare encrypted ss for party i:
             let key_i = &enc_keys[j];
-            let plaintext = BigInt::to_vec(&secret_shares[k].to_big_int());
+            let plaintext = BigInt::to_bytes(&secret_shares[k].to_big_int());
             let aead_pack_i = aes_encrypt(key_i, &plaintext);
             assert!(sendp2p(
                     &client,
@@ -360,7 +360,7 @@ pub async fn gg18_sign(t: usize, n: usize, message_str: String, key: String) {
     let xi_com_vec = Keys::get_commitments_to_xi(&vss_scheme_vec);
     //////////////////////////////////////////////////////////////////////////////
     let (com, decommit) = sign_keys.phase1_broadcast();
-    let (m_a_k, _) = MessageA::a(&sign_keys.k_i, &party_keys.ek, &[_; 0]);
+    let (m_a_k, _) = MessageA::a(&sign_keys.k_i, &party_keys.ek, &[]);
     assert!(broadcast(
         &client,
         party_num_int,

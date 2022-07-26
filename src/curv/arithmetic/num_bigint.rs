@@ -11,6 +11,8 @@ use num_bigint::Sign;
 
 mod primes;
 mod ring_algorithms;
+mod samplable;
+mod serde_support;
 
 /// Big integer
 ///
@@ -18,7 +20,7 @@ mod ring_algorithms;
 /// very limited API that allows easily switching between implementations.
 ///
 /// Set of traits implemented on BigInt remains the same regardless of underlying implementation.
-#[derive(PartialOrd, PartialEq, Ord, Eq, Clone, Serialize, Deserialize)]
+#[derive(PartialOrd, PartialEq, Ord, Eq, Clone)]
 pub struct BigInt {
     num: BN,
 }

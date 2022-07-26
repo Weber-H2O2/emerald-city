@@ -90,7 +90,7 @@ impl Secp256k1Point {
         let hash = HSha256::create_hash(&[&hash]);
 
         let hash = HSha256::create_hash(&[&hash]);
-        let mut hash_vec = BigInt::to_vec(&hash);
+        let mut hash_vec = BigInt::to_bytes(&hash);
         let mut template: Vec<u8> = vec![2];
         template.append(&mut hash_vec);
 
@@ -146,7 +146,7 @@ impl ECScalar<SK> for Secp256k1Scalar {
     fn from(n: &BigInt) -> Secp256k1Scalar {
         let curve_order = FE::q();
         let n_reduced = BigInt::mod_add(n, &BigInt::from(0 as u16), &curve_order);
-        let mut v = BigInt::to_vec(&n_reduced);
+        let mut v = BigInt::to_bytes(&n_reduced);
 
         if v.len() < SECRET_KEY_SIZE {
             let mut template = vec![0; SECRET_KEY_SIZE - v.len()];
@@ -315,7 +315,7 @@ impl ECPoint<PK, SK> for Secp256k1Point {
     }
 
     /// to return from BigInt to PK use from_bytes:
-    /// 1) convert BigInt::to_vec
+    /// 1) convert BigInt::to_bytes
     /// 2) remove first byte [1..33]
     /// 3) call from_bytes
     fn bytes_compressed_to_big_int(&self) -> BigInt {
@@ -404,8 +404,8 @@ impl ECPoint<PK, SK> for Secp256k1Point {
     fn pk_to_key_slice(&self) -> Vec<u8> {
         let mut v = vec![4 as u8];
 
-        v.extend(BigInt::to_vec(&self.x_coor().unwrap()));
-        v.extend(BigInt::to_vec(&self.y_coor().unwrap()));
+        v.extend(BigInt::to_bytes(&self.x_coor().unwrap()));
+        v.extend(BigInt::to_bytes(&self.y_coor().unwrap()));
         v
     }
 
@@ -439,8 +439,8 @@ impl ECPoint<PK, SK> for Secp256k1Point {
         let y = point.y_coor().unwrap();
         let minus_y = BigInt::mod_sub(&order, &y, &order);
 
-        let x_vec = BigInt::to_vec(&x);
-        let y_vec = BigInt::to_vec(&minus_y);
+        let x_vec = BigInt::to_bytes(&x);
+        let y_vec = BigInt::to_bytes(&minus_y);
 
         let mut template_x = vec![0; 32 - x_vec.len()];
         template_x.extend_from_slice(&x_vec);
@@ -458,8 +458,8 @@ impl ECPoint<PK, SK> for Secp256k1Point {
     }
 
     fn from_coor(x: &BigInt, y: &BigInt) -> Secp256k1Point {
-        let mut vec_x = BigInt::to_vec(x);
-        let mut vec_y = BigInt::to_vec(y);
+        let mut vec_x = BigInt::to_bytes(x);
+        let mut vec_y = BigInt::to_bytes(y);
         let coor_size = (UNCOMPRESSED_PUBLIC_KEY_SIZE - 1) / 2;
 
         if vec_x.len() < coor_size {
@@ -596,8 +596,8 @@ mod tests {
     use crate::curv::elliptic::curves::secp256_k1::{FE, GE};
     use crate::curv::elliptic::curves::traits::ECPoint;
     use crate::curv::elliptic::curves::traits::ECScalar;
-    use serde_json;
     use crate::ErrorKey;
+    use serde_json;
 
     #[cfg(target_arch = "wasm32")]
     use wasm_bindgen_test::*;
@@ -698,7 +698,7 @@ mod tests {
     fn test_from_bytes() {
         let g = Secp256k1Point::generator();
         let hash = HSha256::create_hash(&vec![&g.bytes_compressed_to_big_int()]);
-        let hash_vec = BigInt::to_vec(&hash);
+        let hash_vec = BigInt::to_bytes(&hash);
         let result = Secp256k1Point::from_bytes(&hash_vec);
         assert_eq!(result.unwrap_err(), ErrorKey::InvalidPublicKey)
     }
@@ -776,5 +776,4 @@ mod tests {
         let c2 = a * b;
         assert_eq!(c1.get_element(), c2.get_element());
     }
-
 }

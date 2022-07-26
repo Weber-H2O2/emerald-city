@@ -14,10 +14,10 @@ use crate::curv::arithmetic::num_bigint::BigInt;
 
 use super::traits::Commitment;
 use super::SECURITY_BITS;
-use cryptoxide::digest::Digest;
-use cryptoxide::sha3::Sha3;
 use crate::curv::arithmetic::traits::Converter;
 use crate::curv::arithmetic::traits::Samplable;
+use cryptoxide::digest::Digest;
+use cryptoxide::sha3::Sha3;
 
 //TODO:  using the function with BigInt's as input instead of string's makes it impossible to commit to empty message or use empty randomness
 impl Commitment<BigInt> for HashCommitment {
@@ -26,9 +26,9 @@ impl Commitment<BigInt> for HashCommitment {
         blinding_factor: &BigInt,
     ) -> BigInt {
         let mut digest = Sha3::sha3_256();
-        let bytes_message: Vec<u8> = BigInt::to_vec(&message);
+        let bytes_message: Vec<u8> = BigInt::to_bytes(&message);
         digest.input(&bytes_message);
-        let bytes_blinding_factor: Vec<u8> = BigInt::to_vec(&blinding_factor);
+        let bytes_blinding_factor: Vec<u8> = BigInt::to_bytes(&blinding_factor);
         digest.input(&bytes_blinding_factor);
 
         let mut result = [0; 32];
@@ -51,11 +51,11 @@ mod tests {
     use super::Commitment;
     use super::HashCommitment;
     use super::SECURITY_BITS;
-    use cryptoxide::digest::Digest;
-    use cryptoxide::sha3::Sha3;
     use crate::curv::arithmetic::num_bigint::BigInt;
     use crate::curv::arithmetic::traits::Converter;
     use crate::curv::arithmetic::traits::Samplable;
+    use cryptoxide::digest::Digest;
+    use cryptoxide::sha3::Sha3;
     use num_traits::{One, Zero};
 
     #[cfg(target_arch = "wasm32")]
@@ -116,7 +116,7 @@ mod tests {
             &message,
             &BigInt::zero(),
         );
-        let message2: Vec<u8> = BigInt::to_vec(&message);
+        let message2: Vec<u8> = BigInt::to_bytes(&message);
         digest.input(&message2);
         let bytes_blinding_factor: Vec<u8> = (&BigInt::zero()).to_bytes_be();
         digest.input(&bytes_blinding_factor);
