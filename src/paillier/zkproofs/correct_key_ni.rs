@@ -15,7 +15,7 @@
 */
 use std::ops::Shl;
 
-use crate::curv::arithmetic::num_bigint::{from, BigInt};
+use crate::curv::arithmetic::num_bigint::BigInt;
 use crate::curv::arithmetic::traits::*;
 use crate::curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
 use crate::curv::cryptographic_primitives::hashing::traits::Hash;
@@ -44,7 +44,7 @@ impl NICorrectKeyProof {
         let dk_n = &dk.q * &dk.p;
         let key_length = &dk_n.bits();
 
-        let salt_bn = from(SALT_STRING);
+        let salt_bn = BigInt::from(SALT_STRING);
 
         // TODO: use flatten (Morten?)
         let rho_vec = (0..M2)
@@ -67,7 +67,7 @@ impl NICorrectKeyProof {
 
     pub fn verify(&self, ek: &EncryptionKey) -> Result<(), CorrectKeyProofError> {
         let key_length = ek.n.bits() as usize;
-        let salt_bn = from(SALT_STRING);
+        let salt_bn = BigInt::from(SALT_STRING);
 
         let rho_vec = (0..M2)
             .map(|i| {

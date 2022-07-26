@@ -33,8 +33,8 @@ num-traits = "0.2.6"
 
 bit-vec = "0.5"
 cryptoxide = "0.1.1"
-zeroize = "0.5.2"
-curv-kzen = { version = "0.9", default-features = false }
+zeroize = { version = "1.4.3", features = [ "zeroize_derive" ] }
+lazy_static = "1.4"
 
 libsecp256k1 = "0.2.2"
 reqwest = { version = "0.11.11", features = ["json"] }

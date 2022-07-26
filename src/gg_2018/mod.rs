@@ -17,3 +17,4 @@
 pub mod mta;
 pub mod party_i;
 pub mod range_proofs;
+pub mod dLogstatement;

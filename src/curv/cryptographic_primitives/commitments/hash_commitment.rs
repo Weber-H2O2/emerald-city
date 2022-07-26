@@ -16,7 +16,6 @@ use super::traits::Commitment;
 use super::SECURITY_BITS;
 use cryptoxide::digest::Digest;
 use cryptoxide::sha3::Sha3;
-use crate::curv::arithmetic::num_bigint::from;
 use crate::curv::arithmetic::traits::Converter;
 use crate::curv::arithmetic::traits::Samplable;
 
@@ -34,7 +33,7 @@ impl Commitment<BigInt> for HashCommitment {
 
         let mut result = [0; 32];
         digest.result(&mut result);
-        from(result.as_ref())
+        BigInt::from_bytes(result.as_ref())
     }
 
     fn create_commitment(message: &BigInt) -> (BigInt, BigInt) {
@@ -54,7 +53,6 @@ mod tests {
     use super::SECURITY_BITS;
     use cryptoxide::digest::Digest;
     use cryptoxide::sha3::Sha3;
-    use crate::curv::arithmetic::num_bigint::from;
     use crate::curv::arithmetic::num_bigint::BigInt;
     use crate::curv::arithmetic::traits::Converter;
     use crate::curv::arithmetic::traits::Samplable;
@@ -124,7 +122,7 @@ mod tests {
         digest.input(&bytes_blinding_factor);
         let mut result = [0; 32];
         digest.result(&mut result);
-        let hash_result = from(result.as_ref());
+        let hash_result = BigInt::from_bytes(result.as_ref());
         assert_eq!(&commitment, &hash_result);
     }
 }

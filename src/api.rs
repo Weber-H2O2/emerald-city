@@ -350,33 +350,33 @@ pub async fn gg18_sign(t: usize, n: usize, message_str: String, key: String) {
 
     let private = PartyPrivate::set_private(party_keys.clone(), shared_keys);
 
-    // let sign_keys = SignKeys::create(
-    //     &private,
-    //     &vss_scheme_vec[usize::from(signers_vec[usize::from(party_num_int - 1)])],
-    //     signers_vec[usize::from(party_num_int - 1)],
-    //     &signers_vec,
-    // );
+    let sign_keys = SignKeys::create(
+        &private,
+        &vss_scheme_vec[usize::from(signers_vec[usize::from(party_num_int - 1)])],
+        signers_vec[usize::from(party_num_int - 1)],
+        &signers_vec,
+    );
 
-    // let xi_com_vec = Keys::get_commitments_to_xi(&vss_scheme_vec);
-    // //////////////////////////////////////////////////////////////////////////////
-    // let (com, decommit) = sign_keys.phase1_broadcast();
-    // let (m_a_k, _) = MessageA::a(&sign_keys.k_i, &party_keys.ek, &[_; 0]);
-    // assert!(broadcast(
-    //     &client,
-    //     party_num_int,
-    //     "round1",
-    //     serde_json::to_string(&(com.clone(), m_a_k)).unwrap(),
-    //     uuid.clone()
-    // )
-    // .is_ok());
-    // let round1_ans_vec = poll_for_broadcasts(
-    //     &client,
-    //     party_num_int,
-    //     THRESHOLD as u16 + 1,
-    //     // delay,
-    //     "round1",
-    //     uuid.clone(),
-    // ).await;
+    let xi_com_vec = Keys::get_commitments_to_xi(&vss_scheme_vec);
+    //////////////////////////////////////////////////////////////////////////////
+    let (com, decommit) = sign_keys.phase1_broadcast();
+    let (m_a_k, _) = MessageA::a(&sign_keys.k_i, &party_keys.ek, &[_; 0]);
+    assert!(broadcast(
+        &client,
+        party_num_int,
+        "round1",
+        serde_json::to_string(&(com.clone(), m_a_k)).unwrap(),
+        uuid.clone()
+    )
+    .await.is_ok());
+    let round1_ans_vec = poll_for_broadcasts(
+        &client,
+        party_num_int,
+        THRESHOLD as u16 + 1,
+        // delay,
+        "round1",
+        uuid.clone(),
+    ).await;
 
     // let mut j = 0;
     // let mut bc1_vec: Vec<SignBroadcastPhase1> = Vec::new();

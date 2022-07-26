@@ -14,5 +14,9 @@
     @license GPL-3.0+ <https://github.com/KZen-networks/cryptography-utils/blob/master/LICENSE>
 */
 
+mod errors;
+mod macros;
 pub mod num_bigint;
+pub use errors::{ParseBigIntError, TryFromBigIntError};
 pub mod traits;
+pub use traits::*;

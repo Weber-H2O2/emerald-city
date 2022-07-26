@@ -1,3 +1,4 @@
+#![cfg(target_arch = "wasm32")]
 #![allow(dead_code)]
 
 //use std::{env, time, time::Duration};
