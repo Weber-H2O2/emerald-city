@@ -18,7 +18,7 @@ use crate::log;
 use crate::curv::{
     arithmetic::traits::Converter,
     elliptic::curves::{secp256_k1::{Secp256k1Point as Point, Secp256k1Scalar as Scalar}},
-    arithmetic::num_bigint::BigInt,
+    arithmetic::BigInt,
 };
 
 use reqwest::{Client, Body};

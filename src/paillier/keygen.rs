@@ -1,6 +1,6 @@
 //! Key generation following standard recommendations.
 
-use crate::curv::arithmetic::num_bigint::BigInt;
+use crate::curv::arithmetic::BigInt;
 use crate::curv::arithmetic::traits::*;
 use num_traits::{One, Zero};
 use crate::paillier::traits::*;

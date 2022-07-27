@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 use typenum::Unsigned;
 use zeroize::Zeroize;
 
-use crate::BigInt;
+use crate::curv::arithmetic::BigInt;
 
 /// Elliptic curve implementation
 ///
