@@ -14,7 +14,7 @@ license = "GPL-3.0-or-later"
 crate-type = ["cdylib", "rlib"]
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-rand = "0.6.5"
+# rand = "0.6.5"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = { version = "0.2.51", features = ["serde-serialize"] }
@@ -26,6 +26,7 @@ rand = { version = "0.7", features = ["wasm-bindgen"] }
 serde = { version = "1.0.101", features = ["derive"] }
 serde_derive = "1.0"
 serde_json = "1.0"
+serde_bytes = "0.11"
 
 num-bigint = { version = "0.4", features = ["serde", "rand"], optional = true }
 num-integer = "0.1"
@@ -40,9 +41,22 @@ libsecp256k1 = "0.2.2"
 reqwest = { version = "0.11.11", features = ["json"] }
 #reqwest = { path = "../reqwest", version = "0.11.11", features = ["json"] }
 aes-gcm = "0.9.4"
-sha2 = "0.9"
 #futures = "0.3"
 hex = "0.4"
+digest = "0.9"
+hmac = "0.11"
+typenum = "1.13"
+pairing-plus = "0.19"
+sha2 = "0.9"
+sha3 = "0.9"
+old_sha2 = { package = "sha2", version = "0.8" }
+proptest-derive = "0.2.0"
+# secp256k1 = "0.20"                               #TODO
+generic-array = "0.14"
+ff-zeroize = "0.6.3"
+# p256 = "0.9"
+rand_legacy = { package = "rand", version = "0.6" }
+curve25519-dalek = "3.2.0"
 
 [dependencies.web-sys]
 version = "0.3.4"
@@ -57,9 +71,11 @@ features = [
 
 [target.'cfg(target_arch = "wasm32")'.dev-dependencies]
 wasm-bindgen-test = "0.3"
+serde_test = "1.0"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
 criterion = "0.2"
+serde_test = "1.0"
 
 [[bench]]
 name = "keygen"

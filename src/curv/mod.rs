@@ -4,7 +4,21 @@
     (https://github.com/KZen-networks/curv)
     License MIT: <https://github.com/KZen-networks/curv/blob/master/LICENSE>
 */
+pub mod elliptic;
 
 pub mod arithmetic;
+pub use crate::curv::arithmetic::BigInt;
+
 pub mod cryptographic_primitives;
-pub mod elliptic;
+
+mod marker;
+pub use marker::HashChoice;
+
+#[derive(Copy, PartialEq, Eq, Clone, Debug)]
+pub enum ErrorKey {
+    InvalidPublicKey,
+}
+
+pub enum ErrorSS {
+    VerifyShareError,
+}

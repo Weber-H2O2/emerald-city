@@ -5,43 +5,37 @@
     License MIT: https://github.com/KZen-networks/curv/blob/master/LICENSE
 */
 
-//TODO: (open issue) use this struct to represent the commitment HashCommitment{comm: BigInt, r: BigInt, m: BigInt}
-/// calculate commitment c = H(m,r) using SHA3 CRHF.
-/// r is 256bit blinding factor, m is the commited value
-pub struct HashCommitment;
+use std::marker::PhantomData;
 
-use crate::curv::arithmetic::num_bigint::BigInt;
+use digest::Digest;
+
+use crate::curv::arithmetic::traits::*;
+use crate::curv::BigInt;
 
 use super::traits::Commitment;
 use super::SECURITY_BITS;
-use crate::curv::arithmetic::traits::Converter;
-use crate::curv::arithmetic::traits::Samplable;
-use cryptoxide::digest::Digest;
-use cryptoxide::sha3::Sha3;
+
+//TODO: (open issue) use this struct to represent the commitment HashCommitment{comm: BigInt, r: BigInt, m: BigInt}
+/// calculate commitment c = H(m,r) using SHA3 CRHF.
+/// r is 256bit blinding factor, m is the commited value
+pub struct HashCommitment<H: Digest + Clone>(PhantomData<H>);
 
 //TODO:  using the function with BigInt's as input instead of string's makes it impossible to commit to empty message or use empty randomness
-impl Commitment<BigInt> for HashCommitment {
+impl<H: Digest + Clone> Commitment<BigInt> for HashCommitment<H> {
     fn create_commitment_with_user_defined_randomness(
         message: &BigInt,
         blinding_factor: &BigInt,
     ) -> BigInt {
-        let mut digest = Sha3::sha3_256();
-        let bytes_message: Vec<u8> = BigInt::to_bytes(&message);
-        digest.input(&bytes_message);
-        let bytes_blinding_factor: Vec<u8> = BigInt::to_bytes(&blinding_factor);
-        digest.input(&bytes_blinding_factor);
-
-        let mut result = [0; 32];
-        digest.result(&mut result);
-        BigInt::from_bytes(result.as_ref())
+        let digest_result = H::new()
+            .chain(message.to_bytes())
+            .chain(blinding_factor.to_bytes())
+            .finalize();
+        BigInt::from_bytes(digest_result.as_ref())
     }
 
     fn create_commitment(message: &BigInt) -> (BigInt, BigInt) {
         let blinding_factor = BigInt::sample(SECURITY_BITS);
-        let com = HashCommitment::create_commitment_with_user_defined_randomness(
-            message,
-            &blinding_factor,
-        );
+        let com = Self::create_commitment_with_user_defined_randomness(message, &blinding_factor);
         (com, blinding_factor)
     }
 }
@@ -51,35 +45,29 @@ mod tests {
     use super::Commitment;
     use super::HashCommitment;
     use super::SECURITY_BITS;
-    use crate::curv::arithmetic::num_bigint::BigInt;
-    use crate::curv::arithmetic::traits::Converter;
-    use crate::curv::arithmetic::traits::Samplable;
-    use cryptoxide::digest::Digest;
-    use cryptoxide::sha3::Sha3;
-    use num_traits::{One, Zero};
+    use crate::arithmetic::traits::*;
+    use crate::{test_for_all_hashes, BigInt};
+    use digest::Digest;
 
-    #[cfg(target_arch = "wasm32")]
-    use wasm_bindgen_test::*;
-
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
-    #[test]
-    fn test_bit_length_create_commitment() {
-        let hex_len = SECURITY_BITS;
+    test_for_all_hashes!(test_bit_length_create_commitment);
+    fn test_bit_length_create_commitment<H: Digest + Clone>() {
+        let hex_len = H::output_size() * 8;
         let mut ctr_commit_len = 0;
         let mut ctr_blind_len = 0;
-        let sample_size = 1000;
+        let sample_size = 10_000;
         for _ in 1..sample_size {
-            let message = BigInt::sample(SECURITY_BITS);
-            let (commitment, blind_factor) = HashCommitment::create_commitment(&message);
-            if commitment.to_str_radix(2).len() == hex_len {
-                ctr_commit_len = ctr_commit_len + 1;
+            let message = BigInt::sample(hex_len);
+            let (commitment, blind_factor) = HashCommitment::<H>::create_commitment(&message);
+            if commitment.bit_length() == hex_len {
+                ctr_commit_len += 1;
             }
-            if blind_factor.to_str_radix(2).len() == hex_len {
-                ctr_blind_len = ctr_blind_len + 1;
+            // the blinding factor bit length is not related to the hash function.
+            if blind_factor.bit_length() == SECURITY_BITS {
+                ctr_blind_len += 1;
             }
         }
         //test commitment length  - works because SHA256 output length the same as sec_bits
-        // we test that the probability distribuition is according to what is expected. ideally = 0.5
+        // we test that the probability distribution is according to what is expected. ideally = 0.5
         let ctr_commit_len = ctr_commit_len as f32;
         let ctr_blind_len = ctr_blind_len as f32;
         let sample_size = sample_size as f32;
@@ -87,42 +75,44 @@ mod tests {
         assert!(ctr_blind_len / sample_size > 0.3);
     }
 
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
-    #[test]
-    fn test_bit_length_create_commitment_with_user_defined_randomness() {
-        let message = BigInt::sample(SECURITY_BITS);
-        let (_commitment, blind_factor) = HashCommitment::create_commitment(&message);
-        let commitment2 =
-            HashCommitment::create_commitment_with_user_defined_randomness(&message, &blind_factor);
-        assert_eq!(commitment2.to_str_radix(16).len(), SECURITY_BITS / 4);
+    test_for_all_hashes!(test_bit_length_create_commitment_with_user_defined_randomness);
+    fn test_bit_length_create_commitment_with_user_defined_randomness<H: Digest + Clone>() {
+        let sec_bits = H::output_size() * 8;
+        let message = BigInt::sample(sec_bits);
+        let (_commitment, blind_factor) = HashCommitment::<H>::create_commitment(&message);
+        let commitment2 = HashCommitment::<H>::create_commitment_with_user_defined_randomness(
+            &message,
+            &blind_factor,
+        );
+        assert!(commitment2.to_hex().len() / 2 <= sec_bits / 8);
     }
 
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
-    #[test]
-    fn test_random_num_generation_create_commitment_with_user_defined_randomness() {
+    test_for_all_hashes!(test_random_num_generation_create_commitment_with_user_defined_randomness);
+    fn test_random_num_generation_create_commitment_with_user_defined_randomness<
+        H: Digest + Clone,
+    >() {
         let message = BigInt::sample(SECURITY_BITS);
-        let (commitment, blind_factor) = HashCommitment::create_commitment(&message);
-        let commitment2 =
-            HashCommitment::create_commitment_with_user_defined_randomness(&message, &blind_factor);
+        let (commitment, blind_factor) = HashCommitment::<H>::create_commitment(&message);
+        let commitment2 = HashCommitment::<H>::create_commitment_with_user_defined_randomness(
+            &message,
+            &blind_factor,
+        );
         assert_eq!(commitment, commitment2);
     }
 
-    #[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
-    #[test]
-    fn test_hashing_create_commitment_with_user_defined_randomness() {
-        let mut digest = Sha3::sha3_256();
+    test_for_all_hashes!(test_hashing_create_commitment_with_user_defined_randomness);
+    fn test_hashing_create_commitment_with_user_defined_randomness<H: Digest + Clone>() {
+        let mut digest = H::new();
         let message = BigInt::one();
-        let commitment = HashCommitment::create_commitment_with_user_defined_randomness(
+        let commitment = HashCommitment::<H>::create_commitment_with_user_defined_randomness(
             &message,
             &BigInt::zero(),
         );
-        let message2: Vec<u8> = BigInt::to_bytes(&message);
-        digest.input(&message2);
-        let bytes_blinding_factor: Vec<u8> = (&BigInt::zero()).to_bytes_be();
-        digest.input(&bytes_blinding_factor);
-        let mut result = [0; 32];
-        digest.result(&mut result);
-        let hash_result = BigInt::from_bytes(result.as_ref());
+        let message2 = message.to_bytes();
+        digest.update(&message2);
+        let bytes_blinding_factor = &BigInt::zero().to_bytes();
+        digest.update(&bytes_blinding_factor);
+        let hash_result = BigInt::from_bytes(digest.finalize().as_ref());
         assert_eq!(&commitment, &hash_result);
     }
 }

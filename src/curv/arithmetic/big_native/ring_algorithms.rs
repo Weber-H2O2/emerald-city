@@ -55,7 +55,7 @@ pub fn modulo_inverse(a: &BigInt, m: &BigInt) -> Option<BigInt> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::arithmetic::Modulo;
+    use crate::curv::arithmetic::Modulo;
 
     #[test]
     fn test_gcd() {

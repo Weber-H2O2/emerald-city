@@ -3,8 +3,8 @@ use std::fmt;
 use serde::de::{Error, SeqAccess, Visitor};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
+use super::traits::Converter;
 use super::BigInt;
-use crate::curv::arithmetic::traits::Converter;
 
 impl Serialize for BigInt {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>

@@ -1,7 +1,7 @@
 use rand::{rngs::OsRng, RngCore};
 
+use super::traits::{BitManipulation, Converter, Samplable, Zero};
 use super::BigInt;
-use crate::curv::arithmetic::traits::{BitManipulation, Converter, Samplable, Zero};
 
 impl Samplable for BigInt {
     fn sample_below(upper: &Self) -> Self {

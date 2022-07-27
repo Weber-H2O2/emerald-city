@@ -56,7 +56,7 @@ pub async fn gg18_keygen(t: usize, n: usize, save_path: String) {
     };
 
     let PARTIES = n.clone() as u16;
-&[]
+
     console_log!("signup");
     let (party_num_int, uuid) = match signup(&client).await.unwrap() {
         PartySignup {number, uuid} => (number, uuid),
@@ -182,7 +182,7 @@ pub async fn gg18_keygen(t: usize, n: usize, save_path: String) {
             let aead_pack: AEAD = serde_json::from_str(&round3_ans_vec[j]).unwrap();
             let key_i = &enc_keys[j];
             let out = aes_decrypt(key_i, aead_pack);
-            let out_bn = BigInt::from_bytes_be(&out[..]);
+            let out_bn = BigInt::from_bytes(&out[..]);
             let out_fe = ECScalar::from(&out_bn);
             party_shares.push(out_fe);
 

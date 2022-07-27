@@ -5,7 +5,7 @@
     License MIT: https://github.com/KZen-networks/curv/blob/master/LICENSE
 */
 
-use crate::curv::arithmetic::num_bigint::BigInt;
+use crate::curv::arithmetic::BigInt;
 
 pub trait Commitment<T> {
     fn create_commitment_with_user_defined_randomness(
