@@ -21,7 +21,7 @@ use crate::curv::{
         proofs::sigma_dlog::DLogProof, secret_sharing::feldman_vss::VerifiableSS,
     },
     elliptic::curves::{secp256_k1::{Secp256k1Point as Point, Secp256k1Scalar as Scalar}},
-    arithmetic::num_bigint::BigInt,
+    arithmetic::BigInt,
 };
 use crate::curv::elliptic::curves::traits::{ECPoint, ECScalar};
 

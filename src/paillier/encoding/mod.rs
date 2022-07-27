@@ -2,7 +2,7 @@
 
 use std::marker::PhantomData;
 
-use crate::curv::arithmetic::num_bigint::BigInt;
+use crate::curv::arithmetic::BigInt;
 use crate::curv::arithmetic::traits::ConvertFrom;
 pub mod integral;
 use num_traits::One;

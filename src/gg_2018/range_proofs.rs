@@ -9,18 +9,19 @@
 //! 1) In Bob's proofs `gamma` is sampled from `[0;q^2 * N]` and `tau` from `[0;q^3 * N_tilde]`.
 //! 2) A non-interactive version is implemented, with challenge `e` computed via Fiat-Shamir.
 
-use crate::curv::arithmetic::num_bigint::BigInt;
 use crate::curv::arithmetic::traits::*;
+use crate::curv::arithmetic::BigInt;
 use crate::curv::elliptic::curves::secp256_k1::{
-    Secp256k1Point as Point, Secp256k1Scalar as Scalar};
+    Secp256k1Point as Point, Secp256k1Scalar as Scalar,
+};
 use crate::curv::elliptic::curves::traits::{ECPoint, ECScalar};
 use crate::gg_2018::dLogstatement::DLogStatement;
 use sha2::Sha256;
 
 use crate::num_integer::Integer;
 use crate::num_traits::One;
-use crate::sha2::Digest;
 use crate::num_traits::Pow;
+use crate::sha2::Digest;
 
 use crate::paillier::{EncryptionKey, Randomness};
 
@@ -171,12 +172,7 @@ impl AliceProof {
         dlog_statement: &DLogStatement,
         r: &BigInt,
     ) -> Self {
-        let round1 = AliceZkpRound1::from(
-            alice_ek,
-            dlog_statement,
-            a,
-            ECScalar::group_order(),
-        );
+        let round1 = AliceZkpRound1::from(alice_ek, dlog_statement, a, ECScalar::group_order());
 
         let Gen = alice_ek.n.borrow() + 1;
         let e = Sha256::new()

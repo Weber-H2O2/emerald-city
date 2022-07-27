@@ -30,7 +30,7 @@ pub mod bigint {
 
 pub mod vecbigint {
 
-    use curv::arithmetic::num_bigint::BigInt;
+    use curv::arithmetic::BigInt;
     use num_traits::Num;
     use serde::de::SeqAccess;
     use serde::ser::SerializeSeq;

@@ -26,17 +26,19 @@ use crate::curv::arithmetic::traits::*;
 
 use crate::curv::elliptic::curves::traits::*;
 
-use crate::curv::arithmetic::num_bigint::BigInt;
+use crate::curv::arithmetic::BigInt;
 use crate::curv::cryptographic_primitives::commitments::hash_commitment::HashCommitment;
 use crate::curv::cryptographic_primitives::commitments::traits::Commitment;
-use crate::curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
 use crate::curv::cryptographic_primitives::hashing::traits::Hash;
+use crate::curv::cryptographic_primitives::hashing::{Digest, DigestExt};
 use crate::curv::cryptographic_primitives::proofs::sigma_correct_homomorphic_elgamal_enc::*;
 use crate::curv::cryptographic_primitives::proofs::sigma_dlog::{DLogProof, ProveDLog};
 use crate::curv::cryptographic_primitives::secret_sharing::feldman_vss::VerifiableSS;
 use crate::curv::elliptic::curves::secp256_k1::{FE, GE};
-use num_integer::Integer;
 use crate::paillier::{Decrypt, RawCiphertext, RawPlaintext};
+use num_integer::Integer;
+
+use sha2::Sha256;
 
 const SECURITY: usize = 256;
 
@@ -472,7 +474,9 @@ impl LocalSignature {
         let l_i_rho_i = self.l_i.mul(&self.rho_i.get_element());
         let B_i = &g * &l_i_rho_i;
         let V_i = &self.R * &self.s_i + &g * &self.l_i;
-        let input_hash = HSha256::create_hash_from_ge(&[&V_i, &A_i, &B_i]).to_big_int();
+        let input_hash = Sha256::new()
+            .chain_points([&V_i, &A_i, &B_i])
+            .result_bigint();
         let com = HashCommitment::create_commitment_with_user_defined_randomness(
             &input_hash,
             &blind_factor,
@@ -653,8 +657,6 @@ pub fn verify(sig: &Signature, y: &GE, message: &BigInt) -> Result<(), Error> {
     let gu1 = &g * &u1;
     let yu2 = y * &u2;
     // can be faster using shamir trick
-
-    ;
     if sig.r.clone() == ECScalar::from(&(gu1 + yu2).x_coor().unwrap().mod_floor(&FE::q())) {
         Ok(())
     } else {

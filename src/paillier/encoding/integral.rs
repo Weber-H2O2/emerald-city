@@ -9,8 +9,8 @@ use std::borrow::Borrow;
 use std::marker::PhantomData;
 
 use super::{pack, unpack, EncodedCiphertext};
-use crate::curv::arithmetic::num_bigint::BigInt;
 use crate::curv::arithmetic::traits::*;
+use crate::curv::arithmetic::BigInt;
 use crate::paillier::{Paillier, RawCiphertext, RawPlaintext};
 
 impl<EK> Encrypt<EK, u64, EncodedCiphertext<u64>> for Paillier
@@ -452,5 +452,4 @@ mod tests {
         let m: Vec<_> = Paillier::decrypt(&dk, &c);
         assert_eq!(m, vec![4, 8, 12]);
     }
-
 }

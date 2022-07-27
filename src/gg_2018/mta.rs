@@ -13,11 +13,12 @@
 
     @license GPL-3.0+ <https://github.com/KZen-networks/multi-party-ecdsa/blob/master/LICENSE>
 */
-use crate::curv::arithmetic::num_bigint::BigInt;
 use crate::curv::arithmetic::traits::Samplable;
+use crate::curv::arithmetic::BigInt;
 use crate::curv::cryptographic_primitives::proofs::sigma_dlog::DLogProof;
 use crate::curv::elliptic::curves::secp256_k1::{
-    Secp256k1Point as Point, Secp256k1Scalar as Scalar};
+    Secp256k1Point as Point, Secp256k1Scalar as Scalar,
+};
 use crate::curv::elliptic::curves::traits::ECScalar;
 use crate::paillier::traits::EncryptWithChosenRandomness;
 use crate::paillier::{Add, Decrypt, Mul};
@@ -25,13 +26,13 @@ use crate::paillier::{
     DecryptionKey, EncryptionKey, Paillier, Randomness, RawCiphertext, RawPlaintext,
 };
 
-use crate::gg_2018::dLogstatement::DLogStatement;
 use crate::curv::cryptographic_primitives::proofs::sigma_dlog::ProveDLog;
+use crate::curv::elliptic::curves::traits::ECPoint;
+use crate::gg_2018::dLogstatement::DLogStatement;
 use crate::num_integer::Integer;
 use crate::num_traits::One;
 use crate::num_traits::Pow;
 use crate::sha2::Digest;
-use crate::curv::elliptic::curves::traits::ECPoint;
 
 use crate::curv::arithmetic::traits::BasicOps;
 
@@ -212,10 +213,7 @@ impl MessageB {
         }
     }
 
-    pub fn verify_b_against_public(
-        public_gb: &Point,
-        mta_gb: &Point,
-    ) -> bool {
+    pub fn verify_b_against_public(public_gb: &Point, mta_gb: &Point) -> bool {
         public_gb == mta_gb
     }
 }

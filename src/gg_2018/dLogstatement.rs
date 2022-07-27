@@ -1,4 +1,4 @@
-use crate::curv::arithmetic::num_bigint::BigInt;
+use crate::curv::arithmetic::BigInt;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct DLogStatement {

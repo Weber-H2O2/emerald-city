@@ -15,7 +15,7 @@
 */
 use std::ops::Shl;
 
-use crate::curv::arithmetic::num_bigint::BigInt;
+use crate::curv::arithmetic::BigInt;
 use crate::curv::arithmetic::traits::*;
 use crate::curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
 use crate::curv::cryptographic_primitives::hashing::traits::Hash;
