@@ -454,6 +454,7 @@ dependencies = [
  "hmac 0.11.0",
  "lazy_static",
  "libsecp256k1",
+ "merkle-cbt",
  "num-bigint 0.4.3",
  "num-integer",
  "num-traits",
@@ -918,6 +919,15 @@ name = "memoffset"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0f9dc261e2b62d7a622bf416ea3c5245cdd5d9a7fcc428c0d06804dfce1775b3"
+
+[[package]]
+name = "merkle-cbt"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "171d2f700835121c3b04ccf0880882987a050fd5c7ae88148abf537d33dd3a56"
+dependencies = [
+ "cfg-if 1.0.0",
+]
 
 [[package]]
 name = "mime"

@@ -59,6 +59,7 @@ ff-zeroize = "0.6.3"
 rand_legacy = { package = "rand", version = "0.6" }
 curve25519-dalek = "3.2.0"
 thiserror = "1.0.23"
+merkle-cbt = "0.3.2"
 
 [dependencies.web-sys]
 version = "0.3.4"
