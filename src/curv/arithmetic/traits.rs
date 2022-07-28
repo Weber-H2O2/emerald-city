@@ -15,11 +15,15 @@
 */
 
 use std::marker::Sized;
+use num_bigint::BigUint;
 
 pub trait Converter {
     fn to_vec(n: &Self) -> Vec<u8>;
     fn to_hex(&self) -> String;
     fn from_hex(n: &str) -> Self;
+
+    fn to_bytes(value: &BigUint) -> Vec<u8>;
+    fn from_bytes(bytes: &[u8]) -> Self;
 }
 
 pub trait Modulo {
@@ -37,8 +41,8 @@ pub trait Samplable {
 }
 
 pub trait NumberTests {
-    fn is_zero(&Self) -> bool;
-    fn is_even(&Self) -> bool;
+    fn is_zero(_: &Self) -> bool;
+    fn is_even(_: &Self) -> bool;
     fn is_negative(me: &Self) -> bool;
 }
 
@@ -55,6 +59,17 @@ pub trait BitManipulation {
 }
 
 pub trait ConvertFrom<T> {
-    fn _from(&T) -> Self;
+    fn _from(_: &T) -> Self;
 }
 //use std::ops::{Add, Div, Mul, Neg, Rem, Shr, Sub};
+/// Provides basic arithmetic operators for BigInt
+///
+/// Note that BigInt also implements std::ops::{Add, Mull, ...} traits, so you can
+/// use them instead.
+pub trait BasicOps {
+    fn pow(&self, exponent: u32) -> Self;
+    fn mul(&self, other: &Self) -> Self;
+    fn sub(&self, other: &Self) -> Self;
+    fn add(&self, other: &Self) -> Self;
+    fn abs(&self) -> Self;
+}

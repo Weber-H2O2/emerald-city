@@ -17,3 +17,5 @@
 mod correct_key_ni;
 pub use self::correct_key_ni::CorrectKeyProofError;
 pub use self::correct_key_ni::NICorrectKeyProof;
+mod wi_dlog_proof;
+pub use self::wi_dlog_proof::DLogStatement;

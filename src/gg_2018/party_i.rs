@@ -16,27 +16,27 @@
     @license GPL-3.0+ <https://github.com/KZen-networks/multi-party-ecdsa/blob/master/LICENSE>
 */
 
-use paillier::zkproofs::NICorrectKeyProof;
-use paillier::KeyGeneration;
-use paillier::Paillier;
-use paillier::{DecryptionKey, EncryptionKey};
-use Error::{self, InvalidCom, InvalidKey, InvalidSS, InvalidSig};
+use crate::paillier::zkproofs::NICorrectKeyProof;
+use crate::paillier::KeyGeneration;
+use crate::paillier::Paillier;
+use crate::paillier::{DecryptionKey, EncryptionKey};
+use crate::Error::{self, InvalidCom, InvalidKey, InvalidSS, InvalidSig};
 
-use curv::arithmetic::traits::*;
+use crate::curv::arithmetic::traits::*;
 
-use curv::elliptic::curves::traits::*;
+use crate::curv::elliptic::curves::traits::*;
 
-use curv::arithmetic::num_bigint::BigInt;
-use curv::cryptographic_primitives::commitments::hash_commitment::HashCommitment;
-use curv::cryptographic_primitives::commitments::traits::Commitment;
-use curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
-use curv::cryptographic_primitives::hashing::traits::Hash;
-use curv::cryptographic_primitives::proofs::sigma_correct_homomorphic_elgamal_enc::*;
-use curv::cryptographic_primitives::proofs::sigma_dlog::{DLogProof, ProveDLog};
-use curv::cryptographic_primitives::secret_sharing::feldman_vss::VerifiableSS;
-use curv::elliptic::curves::secp256_k1::{FE, GE};
+use crate::curv::arithmetic::num_bigint::BigInt;
+use crate::curv::cryptographic_primitives::commitments::hash_commitment::HashCommitment;
+use crate::curv::cryptographic_primitives::commitments::traits::Commitment;
+use crate::curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
+use crate::curv::cryptographic_primitives::hashing::traits::Hash;
+use crate::curv::cryptographic_primitives::proofs::sigma_correct_homomorphic_elgamal_enc::*;
+use crate::curv::cryptographic_primitives::proofs::sigma_dlog::{DLogProof, ProveDLog};
+use crate::curv::cryptographic_primitives::secret_sharing::feldman_vss::VerifiableSS;
+use crate::curv::elliptic::curves::secp256_k1::{FE, GE};
 use num_integer::Integer;
-use paillier::{Decrypt, RawCiphertext, RawPlaintext};
+use crate::paillier::{Decrypt, RawCiphertext, RawPlaintext};
 
 const SECURITY: usize = 256;
 
@@ -465,7 +465,7 @@ impl LocalSignature {
         }
     }
 
-    pub fn phase5a_broadcast_5b_zkproof(&self) -> (Phase5Com1, Phase5ADecom1, HomoELGamalProof) {
+    pub fn phase5a_broadcast_5b_zkproof(&self) -> (Phase5Com1, Phase5ADecom1, HomoELGamalProof, DLogProof) {
         let blind_factor = BigInt::sample(SECURITY);
         let g: GE = ECPoint::generator();
         let A_i = &g * &self.rho_i;
@@ -488,6 +488,7 @@ impl LocalSignature {
             D: V_i.clone(),
             E: B_i.clone(),
         };
+        let dlog_proof_rho = DLogProof::prove(&self.rho_i);
         let proof = HomoELGamalProof::prove(&witness, &delta);
 
         (
@@ -499,6 +500,7 @@ impl LocalSignature {
                 blind_factor,
             },
             proof,
+            dlog_proof_rho,
         )
     }
 
@@ -507,6 +509,7 @@ impl LocalSignature {
         decom_vec: &Vec<Phase5ADecom1>,
         com_vec: &Vec<Phase5Com1>,
         elgamal_proofs: &Vec<HomoELGamalProof>,
+        dlog_proofs_rho: &[DLogProof],
         v_i: &GE,
         R: &GE,
     ) -> Result<(Phase5Com2, Phase5DDecom2), Error> {
@@ -534,6 +537,7 @@ impl LocalSignature {
                     &decom_vec[i].blind_factor,
                 ) == com_vec[i].com
                     && elgamal_proofs[i].verify(&delta).is_ok()
+                    && DLogProof::verify(&dlog_proofs_rho[i]).is_ok()
             })
             .all(|x| x == true);
 

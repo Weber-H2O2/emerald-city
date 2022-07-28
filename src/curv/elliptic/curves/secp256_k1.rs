@@ -19,14 +19,14 @@
 use super::rand::{thread_rng, Rng};
 use super::secp256k1::{PublicKey, SecretKey};
 use super::traits::{ECPoint, ECScalar};
-use curv::arithmetic::num_bigint::from;
-use curv::arithmetic::num_bigint::BigInt;
-use curv::arithmetic::traits::{Converter, Modulo};
-use curv::cryptographic_primitives::hashing::constants::{
+use crate::curv::arithmetic::num_bigint::from;
+use crate::curv::arithmetic::num_bigint::BigInt;
+use crate::curv::arithmetic::traits::{Converter, Modulo};
+use crate::curv::cryptographic_primitives::hashing::constants::{
     CURVE_ORDER, GENERATOR_X, GENERATOR_Y, SECRET_KEY_SIZE, UNCOMPRESSED_PUBLIC_KEY_SIZE,
 };
-use curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
-use curv::cryptographic_primitives::hashing::traits::Hash;
+use crate::curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
+use crate::curv::cryptographic_primitives::hashing::traits::Hash;
 use num_traits::Num;
 use serde::de;
 use serde::de::{MapAccess, Visitor};
@@ -40,8 +40,13 @@ use std::sync::atomic;
 use zeroize::Zeroize;
 
 use super::secp256k1::curve::Scalar;
+use generic_array::GenericArray;
 
-use ErrorKey;
+lazy_static::lazy_static! {
+    static ref CURVE_ORDER_: BigInt = BigInt::from_bytes_be(&CURVE_ORDER);
+}
+
+use crate::ErrorKey;
 pub type SK = SecretKey;
 pub type PK = PublicKey;
 
@@ -118,6 +123,9 @@ impl Zeroize for FE {
 }
 
 impl ECScalar<SK> for Secp256k1Scalar {
+
+    type ScalarLength = typenum::U32;
+
     fn new_random() -> Secp256k1Scalar {
         let mut arr = [0u8; 32];
         thread_rng().fill(&mut arr[..]);
@@ -168,6 +176,10 @@ impl ECScalar<SK> for Secp256k1Scalar {
 
     fn q() -> BigInt {
         from(CURVE_ORDER.as_ref())
+    }
+
+    fn group_order() -> &'static BigInt {
+        &CURVE_ORDER_
     }
 
     fn add(&self, other: &SK) -> Secp256k1Scalar {
@@ -301,6 +313,8 @@ impl Zeroize for GE {
 }
 
 impl ECPoint<PK, SK> for Secp256k1Point {
+    type CompressedPointLength = typenum::U33;
+    type UncompressedPointLength = typenum::U65;
     fn generator() -> Secp256k1Point {
         let mut v = vec![4 as u8];
         v.extend(GENERATOR_X.as_ref());
@@ -320,7 +334,7 @@ impl ECPoint<PK, SK> for Secp256k1Point {
     /// 2) remove first byte [1..33]
     /// 3) call from_bytes
     fn bytes_compressed_to_big_int(&self) -> BigInt {
-        let mut serial = self.ge.serialize();
+        let serial = self.ge.serialize();
         let y_coor_last_byte = serial[64].clone();
         let y_coor_parity = (y_coor_last_byte << 7) >> 7;
         let mut compressed = vec![2 + y_coor_parity];
@@ -349,7 +363,7 @@ impl ECPoint<PK, SK> for Secp256k1Point {
 
         let byte_len = bytes_vec.len();
         match byte_len {
-            33...63 => {
+            33..=63 => {
                 let mut template = vec![0; 64 - bytes_vec.len()];
                 template.extend_from_slice(&bytes);
                 let bytes_vec = template;
@@ -366,7 +380,7 @@ impl ECPoint<PK, SK> for Secp256k1Point {
                 test.map_err(|_err| ErrorKey::InvalidPublicKey)
             }
 
-            0...32 => {
+            0..=32 => {
                 let mut template = vec![0; 32 - bytes_vec.len()];
                 template.extend_from_slice(&bytes);
                 let bytes_vec = template;
@@ -456,6 +470,15 @@ impl ECPoint<PK, SK> for Secp256k1Point {
         let minus_point: GE = ECPoint::from_bytes(&x_vec).unwrap();
         //let minus_point: GE = ECPoint::from_coor(&x, &y_inv);
         ECPoint::add_point(self, &minus_point.get_element())
+    }
+
+    /// Serializes a point in (un)compressed form
+    fn to_bytes(&self, compressed: bool) -> Vec<u8> {
+        if compressed {
+            self.ge.serialize_compressed().to_vec()
+        } else {
+            self.ge.serialize().to_vec()
+        }
     }
 
     fn from_coor(x: &BigInt, y: &BigInt) -> Secp256k1Point {
@@ -587,18 +610,18 @@ impl<'de> Visitor<'de> for Secp256k1PointVisitor {
 }
 #[cfg(test)]
 mod tests {
-    use curv::arithmetic::num_bigint::BigInt;
-    use curv::arithmetic::traits::Converter;
-    use curv::arithmetic::traits::Modulo;
-    use curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
-    use curv::cryptographic_primitives::hashing::traits::Hash;
-    use curv::elliptic::curves::secp256_k1::Secp256k1Point;
-    use curv::elliptic::curves::secp256_k1::Secp256k1Scalar;
-    use curv::elliptic::curves::secp256_k1::{FE, GE};
-    use curv::elliptic::curves::traits::ECPoint;
-    use curv::elliptic::curves::traits::ECScalar;
+    use crate::curv::arithmetic::num_bigint::BigInt;
+    use crate::curv::arithmetic::traits::Converter;
+    use crate::curv::arithmetic::traits::Modulo;
+    use crate::curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
+    use crate::curv::cryptographic_primitives::hashing::traits::Hash;
+    use crate::curv::elliptic::curves::secp256_k1::Secp256k1Point;
+    use crate::curv::elliptic::curves::secp256_k1::Secp256k1Scalar;
+    use crate::curv::elliptic::curves::secp256_k1::{FE, GE};
+    use crate::curv::elliptic::curves::traits::ECPoint;
+    use crate::curv::elliptic::curves::traits::ECScalar;
     use serde_json;
-    use ErrorKey;
+    use crate::ErrorKey;
 
     #[cfg(target_arch = "wasm32")]
     use wasm_bindgen_test::*;

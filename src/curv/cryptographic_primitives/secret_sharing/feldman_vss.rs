@@ -6,11 +6,11 @@
     License MIT: <https://github.com/KZen-networks/curv/blob/master/LICENSE>
 */
 
-use curv::arithmetic::num_bigint::BigInt;
-use curv::elliptic::curves::secp256_k1::{FE, GE};
-use curv::elliptic::curves::traits::*;
+use crate::curv::arithmetic::num_bigint::BigInt;
+use crate::curv::elliptic::curves::secp256_k1::{FE, GE};
+use crate::curv::elliptic::curves::traits::*;
 use num_traits::One;
-use ErrorSS::{self, VerifyShareError};
+use crate::ErrorSS::{self, VerifyShareError};
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct ShamirSecretSharing {
     pub threshold: usize,   //t
@@ -241,8 +241,8 @@ impl VerifiableSS {
 
 #[cfg(test)]
 mod tests {
-    use curv::cryptographic_primitives::secret_sharing::feldman_vss::*;
-    use curv::elliptic::curves::secp256_k1::{FE, GE};
+    use crate::curv::cryptographic_primitives::secret_sharing::feldman_vss::*;
+    use crate::curv::elliptic::curves::secp256_k1::{FE, GE};
 
     #[cfg(target_arch = "wasm32")]
     use wasm_bindgen_test::*;

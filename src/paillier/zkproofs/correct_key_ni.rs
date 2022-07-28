@@ -15,13 +15,13 @@
 */
 use std::ops::Shl;
 
-use curv::arithmetic::num_bigint::{from, BigInt};
-use curv::arithmetic::traits::*;
-use curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
-use curv::cryptographic_primitives::hashing::traits::Hash;
+use crate::curv::arithmetic::num_bigint::{from, BigInt};
+use crate::curv::arithmetic::traits::*;
+use crate::curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
+use crate::curv::cryptographic_primitives::hashing::traits::Hash;
 use num_integer::Integer;
 use num_traits::{One, Zero};
-use paillier::{extract_nroot, DecryptionKey, EncryptionKey};
+use crate::paillier::{extract_nroot, DecryptionKey, EncryptionKey};
 // This protocol is based on the NIZK protocol in https://eprint.iacr.org/2018/057.pdf
 // for parameters = e = N, m2 = 11, alpha = 6379 see https://eprint.iacr.org/2018/987.pdf 6.2.3
 // for full details.
@@ -108,8 +108,8 @@ pub fn mask_generation(out_length: &usize, seed: &BigInt) -> BigInt {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use paillier::KeyGeneration;
-    use paillier::Paillier;
+    use crate::paillier::KeyGeneration;
+    use crate::paillier::Paillier;
 
     #[cfg(target_arch = "wasm32")]
     use wasm_bindgen_test::*;

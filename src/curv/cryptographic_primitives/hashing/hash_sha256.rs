@@ -8,9 +8,9 @@
 use super::traits::Hash;
 use cryptoxide::digest::Digest;
 use cryptoxide::sha2::Sha256;
-use curv::arithmetic::num_bigint::{from, BigInt};
-use curv::elliptic::curves::secp256_k1::{FE, GE};
-use curv::elliptic::curves::traits::{ECPoint, ECScalar};
+use crate::curv::arithmetic::num_bigint::{from, BigInt};
+use crate::curv::elliptic::curves::secp256_k1::{FE, GE};
+use crate::curv::elliptic::curves::traits::{ECPoint, ECScalar};
 
 pub struct HSha256;
 
@@ -46,10 +46,10 @@ impl Hash for HSha256 {
 mod tests {
     use super::HSha256;
     use super::Hash;
-    use curv::arithmetic::num_bigint::BigInt;
-    use curv::elliptic::curves::secp256_k1::GE;
-    use curv::elliptic::curves::traits::ECPoint;
-    use curv::elliptic::curves::traits::ECScalar;
+    use crate::curv::arithmetic::num_bigint::BigInt;
+    use crate::curv::elliptic::curves::secp256_k1::GE;
+    use crate::curv::elliptic::curves::traits::ECPoint;
+    use crate::curv::elliptic::curves::traits::ECScalar;
     use num_traits::{One, Zero};
 
     #[cfg(target_arch = "wasm32")]
