@@ -164,7 +164,7 @@ pub fn sign(t: usize, n: usize, ttag: usize, s: Vec<usize>) {
     // m_a_vec = [ma_0;ma_1;,...]
     let mut m_a_vec = Vec::new();
     for i in 0..ttag.clone() {
-        let m_a_k = MessageA::a(&sign_keys_vec[i].k_i, &party_keys_vec[s[i]].ek);
+        let (m_a_k, _) = MessageA::a(&sign_keys_vec[i].k_i, &party_keys_vec[s[i]].ek, &[]);
 
         m_a_vec.push(m_a_k);
     }
@@ -187,16 +187,18 @@ pub fn sign(t: usize, n: usize, ttag: usize, s: Vec<usize>) {
         for j in 0..ttag - 1 {
             let ind = if j < i { j } else { j + 1 };
 
-            let (m_b_gamma, beta_gamma) = MessageB::b(
+            let (m_b_gamma, beta_gamma, _, _) = MessageB::b(
                 &sign_keys_vec[i].gamma_i,
                 &party_keys_vec[s[ind]].ek,
                 m_a_vec[ind].clone(),
-            );
-            let (m_b_w, beta_wi) = MessageB::b(
+                &[],
+            ).unwrap();
+            let (m_b_w, beta_wi, _, _) = MessageB::b(
                 &sign_keys_vec[i].w_i,
                 &party_keys_vec[s[ind]].ek,
                 m_a_vec[ind].clone(),
-            );
+                &[],
+            ).unwrap();
 
             m_b_gamma_vec.push(m_b_gamma);
             beta_vec.push(beta_gamma);
@@ -242,8 +244,8 @@ pub fn sign(t: usize, n: usize, ttag: usize, s: Vec<usize>) {
             // TODO: use pk_vec (first change from x_i to w_i) for this check.
             assert_eq!(m_b.b_proof.pk.clone(), sign_keys_vec[i].g_w_i.clone());
 
-            alpha_vec.push(alpha_ij_gamma);
-            miu_vec.push(alpha_ij_wi);
+            alpha_vec.push(alpha_ij_gamma.0);
+            miu_vec.push(alpha_ij_wi.0);
         }
         alpha_vec_all.push(alpha_vec.clone());
         miu_vec_all.push(miu_vec.clone());
@@ -305,12 +307,14 @@ pub fn sign(t: usize, n: usize, ttag: usize, s: Vec<usize>) {
     let mut phase_5a_decom_vec: Vec<Phase5ADecom1> = Vec::new();
     let mut helgamal_proof_vec = Vec::new();
     // we notice that the proof for V= R^sg^l, B = A^l is a general form of homomorphic elgamal.
+    let mut dlog_proof_rho_vec = Vec::new();
     for i in 0..ttag.clone() {
-        let (phase5_com, phase_5a_decom, helgamal_proof) =
+        let (phase5_com, phase_5a_decom, helgamal_proof, dlog_proof_rho) =
             local_sig_vec[i].phase5a_broadcast_5b_zkproof();
         phase5_com_vec.push(phase5_com);
         phase_5a_decom_vec.push(phase_5a_decom);
         helgamal_proof_vec.push(helgamal_proof);
+        dlog_proof_rho_vec.push(dlog_proof_rho);
     }
 
     let mut phase5_com2_vec = Vec::new();
@@ -319,16 +323,19 @@ pub fn sign(t: usize, n: usize, ttag: usize, s: Vec<usize>) {
         let mut phase_5a_decom_vec_clone = phase_5a_decom_vec.clone();
         let mut phase_5a_com_vec_clone = phase5_com_vec.clone();
         let mut phase_5b_elgamal_vec_clone = helgamal_proof_vec.clone();
+        let mut phase_5a_dlog_vec_clone = dlog_proof_rho_vec.clone();
 
         let _decom_i = phase_5a_decom_vec_clone.remove(i);
         let _com_i = phase_5a_com_vec_clone.remove(i);
         let _elgamal_i = phase_5b_elgamal_vec_clone.remove(i);
+        let _dlog_proof_rho = phase_5a_dlog_vec_clone.remove(i);
         //        for j in 0..s_minus_i.len() {
         let (phase5_com2, phase_5d_decom2) = local_sig_vec[i]
             .phase5c(
                 &phase_5a_decom_vec_clone,
                 &phase_5a_com_vec_clone,
                 &phase_5b_elgamal_vec_clone,
+                &phase_5a_dlog_vec_clone,
                 &phase_5a_decom_vec[i].V_i,
                 &R_vec[0],
             )

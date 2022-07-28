@@ -8,27 +8,6 @@ use crate::curv::elliptic::curves::secp256_k1::{Secp256k1Point as Point, Secp256
 use crate::curv::elliptic::curves::traits::{ECPoint, ECScalar};
 use crate::curv::arithmetic::num_bigint::*;
 
-/// [Digest] extension allowing to hash elliptic points, scalars, and bigints
-///
-/// Can be used with any hashing algorithm that implements `Digest` traits (e.g. [Sha256](sha2::Sha256),
-/// [Sha512](sha2::Sha512), etc.)
-///
-/// ## Example
-///
-/// ```rust
-/// use sha2::Sha256;
-/// use curv::arithmetic::*;
-/// use curv::cryptographic_primitives::hashing::{Digest, DigestExt};
-/// use curv::elliptic::curves::{Secp256k1, Point};
-///
-/// let hash = Sha256::new()
-///     .chain_point(&Point::<Secp256k1>::generator())
-///     .chain_point(Point::<Secp256k1>::base_point2())
-///     .chain_bigint(&BigInt::from(10))
-///     .result_bigint();
-///
-/// assert_eq!(hash, BigInt::from_hex("73764f937fbe25092466b417fa66ad9c62607865e1f8151df253aa3a2fd7599b").unwrap());
-/// ```
 pub trait DigestExt {
     fn input_bigint(&mut self, n: &BigInt);
     fn input_point(&mut self, point: &Point);
