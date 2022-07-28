@@ -40,6 +40,11 @@ use std::sync::atomic;
 use zeroize::Zeroize;
 
 use super::secp256k1::curve::Scalar;
+use generic_array::GenericArray;
+
+lazy_static::lazy_static! {
+    static ref CURVE_ORDER_: BigInt = BigInt::from_bytes_be(&CURVE_ORDER);
+}
 
 use crate::ErrorKey;
 pub type SK = SecretKey;
@@ -118,6 +123,9 @@ impl Zeroize for FE {
 }
 
 impl ECScalar<SK> for Secp256k1Scalar {
+
+    type ScalarLength = typenum::U32;
+
     fn new_random() -> Secp256k1Scalar {
         let mut arr = [0u8; 32];
         thread_rng().fill(&mut arr[..]);
@@ -168,6 +176,10 @@ impl ECScalar<SK> for Secp256k1Scalar {
 
     fn q() -> BigInt {
         from(CURVE_ORDER.as_ref())
+    }
+
+    fn group_order() -> &'static BigInt {
+        &CURVE_ORDER_
     }
 
     fn add(&self, other: &SK) -> Secp256k1Scalar {
@@ -301,6 +313,8 @@ impl Zeroize for GE {
 }
 
 impl ECPoint<PK, SK> for Secp256k1Point {
+    type CompressedPointLength = typenum::U33;
+    type UncompressedPointLength = typenum::U65;
     fn generator() -> Secp256k1Point {
         let mut v = vec![4 as u8];
         v.extend(GENERATOR_X.as_ref());
@@ -456,6 +470,15 @@ impl ECPoint<PK, SK> for Secp256k1Point {
         let minus_point: GE = ECPoint::from_bytes(&x_vec).unwrap();
         //let minus_point: GE = ECPoint::from_coor(&x, &y_inv);
         ECPoint::add_point(self, &minus_point.get_element())
+    }
+
+    /// Serializes a point in (un)compressed form
+    fn to_bytes(&self, compressed: bool) -> Vec<u8> {
+        if compressed {
+            self.ge.serialize_compressed().to_vec()
+        } else {
+            self.ge.serialize().to_vec()
+        }
     }
 
     fn from_coor(x: &BigInt, y: &BigInt) -> Secp256k1Point {

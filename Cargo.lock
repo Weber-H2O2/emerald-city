@@ -313,6 +313,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "crypto-mac"
+version = "0.11.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1d1a86f49236c215f271d40892d5fc950490551400b02ef360692c29815c714"
+dependencies = [
+ "generic-array 0.14.5",
+ "subtle",
+]
+
+[[package]]
 name = "cryptoxide"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -380,6 +390,11 @@ dependencies = [
  "bit-vec",
  "criterion",
  "cryptoxide",
+ "digest 0.9.0",
+ "generic-array 0.14.5",
+ "hex",
+ "hmac 0.11.0",
+ "lazy_static",
  "libsecp256k1",
  "num-bigint",
  "num-integer",
@@ -390,6 +405,7 @@ dependencies = [
  "serde_derive",
  "serde_json",
  "sha2 0.9.9",
+ "typenum",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-bindgen-test",
@@ -553,14 +569,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
 
 [[package]]
+name = "hex"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
+
+[[package]]
 name = "hmac"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7a13f4163aa0c5ca1be584aace0e2212b2e41be5478218d4f657f5f778b2ae2a"
 dependencies = [
- "crypto-mac",
+ "crypto-mac 0.4.0",
  "digest 0.6.2",
  "generic-array 0.8.3",
+]
+
+[[package]]
+name = "hmac"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2a2a2320eb7ec0ebe8da8f744d7812d9fc4cb4d09344ac01898dbcb6a20ae69b"
+dependencies = [
+ "crypto-mac 0.11.1",
+ "digest 0.9.0",
 ]
 
 [[package]]
@@ -571,7 +603,7 @@ checksum = "4fe727d41d2eec0a6574d887914347e5ff96a3b87177817e2a9820c5c87fecc2"
 dependencies = [
  "digest 0.6.2",
  "generic-array 0.8.3",
- "hmac",
+ "hmac 0.4.2",
 ]
 
 [[package]]

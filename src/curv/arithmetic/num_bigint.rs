@@ -10,7 +10,9 @@ use num_traits::cast::ToPrimitive;
 use num_traits::identities::Zero;
 use num_traits::Num;
 use num_traits::One;
+use std::convert::TryInto;
 use std::ops::{BitAnd, BitOr, Shl};
+use num_bigint::Sign;
 
 impl Samplable for BigUint {
     fn sample_below(upper: &Self) -> Self {
@@ -205,6 +207,15 @@ impl<'de> Visitor<'de> for BigUintVisitor {
 */
 
 impl Converter for BigUint {
+    fn to_bytes(value: &BigUint) -> Vec<u8> {
+        let bytes: Vec<u8> = value.to_bytes_be();
+        bytes
+    }
+
+    fn from_bytes(bytes: &[u8]) -> Self {
+        BigUint::from_bytes_be(bytes)
+    }
+
     fn to_vec(value: &BigUint) -> Vec<u8> {
         let bytes: Vec<u8> = value.to_bytes_be();
 
@@ -219,3 +230,27 @@ impl Converter for BigUint {
         BigInt::from_str_radix(value, 16).expect("Error in serialization")
     }
 }
+
+/*
+impl BasicOps for BigInt {
+    fn pow(&self, exponent: u32) -> Self {
+        self.num.pow(exponent).wrap()
+    }
+
+    fn mul(&self, other: &Self) -> Self {
+        self * other
+    }
+
+    fn sub(&self, other: &Self) -> Self {
+        self - other
+    }
+
+    fn add(&self, other: &Self) -> Self {
+        self + other
+    }
+
+    fn abs(&self) -> Self {
+        self.num.abs().wrap()
+    }
+}
+*/
