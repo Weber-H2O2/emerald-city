@@ -35,8 +35,11 @@ use crate::curv::cryptographic_primitives::proofs::sigma_correct_homomorphic_elg
 use crate::curv::cryptographic_primitives::proofs::sigma_dlog::{DLogProof, ProveDLog};
 use crate::curv::cryptographic_primitives::secret_sharing::feldman_vss::VerifiableSS;
 use crate::curv::elliptic::curves::secp256_k1::{FE, GE};
-use num_integer::Integer;
 use crate::paillier::{Decrypt, RawCiphertext, RawPlaintext};
+use num_integer::Integer;
+
+use crate::console_log;
+use crate::log;
 
 const SECURITY: usize = 256;
 
@@ -416,6 +419,7 @@ impl SignKeys {
         //  g_gamma_i_vec: &Vec<GE>,
         bc1_vec: &Vec<SignBroadcastPhase1>,
     ) -> Result<GE, Error> {
+        crate::console_log!("419");
         let test_b_vec_and_com = (0..b_proof_vec.len())
             .map(|i| {
                 b_proof_vec[i].pk.get_element() == phase1_decommit_vec[i].g_gamma_i.get_element()
@@ -428,9 +432,14 @@ impl SignKeys {
             })
             .all(|x| x == true);
 
+        crate::console_log!("phase1_decommit_vecL.len(): {}", phase1_decommit_vec.len());
+
         let mut g_gamma_i_iter = phase1_decommit_vec.iter();
+        crate::console_log!("before unwrap");
         let head = g_gamma_i_iter.next().unwrap();
+        crate::console_log!("after head unwrap",);
         let tail = g_gamma_i_iter;
+        crate::console_log!("438");
         match test_b_vec_and_com {
             true => Ok({
                 let gamma_sum = tail.fold(head.g_gamma_i.clone(), |acc, x| acc + &x.g_gamma_i);
@@ -465,7 +474,9 @@ impl LocalSignature {
         }
     }
 
-    pub fn phase5a_broadcast_5b_zkproof(&self) -> (Phase5Com1, Phase5ADecom1, HomoELGamalProof, DLogProof) {
+    pub fn phase5a_broadcast_5b_zkproof(
+        &self,
+    ) -> (Phase5Com1, Phase5ADecom1, HomoELGamalProof, DLogProof) {
         let blind_factor = BigInt::sample(SECURITY);
         let g: GE = ECPoint::generator();
         let A_i = &g * &self.rho_i;
@@ -657,8 +668,6 @@ pub fn verify(sig: &Signature, y: &GE, message: &BigInt) -> Result<(), Error> {
     let gu1 = &g * &u1;
     let yu2 = y * &u2;
     // can be faster using shamir trick
-
-    ;
     if sig.r.clone() == ECScalar::from(&(gu1 + yu2).x_coor().unwrap().mod_floor(&FE::q())) {
         Ok(())
     } else {

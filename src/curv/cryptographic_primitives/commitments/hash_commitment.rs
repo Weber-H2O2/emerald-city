@@ -14,11 +14,14 @@ use crate::curv::arithmetic::num_bigint::BigInt;
 
 use super::traits::Commitment;
 use super::SECURITY_BITS;
-use cryptoxide::digest::Digest;
-use cryptoxide::sha3::Sha3;
 use crate::curv::arithmetic::num_bigint::from;
 use crate::curv::arithmetic::traits::Converter;
 use crate::curv::arithmetic::traits::Samplable;
+use cryptoxide::digest::Digest;
+use cryptoxide::sha3::Sha3;
+
+use crate::console_log;
+use crate::log;
 
 //TODO:  using the function with BigInt's as input instead of string's makes it impossible to commit to empty message or use empty randomness
 impl Commitment<BigInt> for HashCommitment {
@@ -26,6 +29,7 @@ impl Commitment<BigInt> for HashCommitment {
         message: &BigInt,
         blinding_factor: &BigInt,
     ) -> BigInt {
+        crate::console_log!("create_commitment_with_user_defined_randomness: 29");
         let mut digest = Sha3::sha3_256();
         let bytes_message: Vec<u8> = BigInt::to_vec(&message);
         digest.input(&bytes_message);
@@ -52,12 +56,12 @@ mod tests {
     use super::Commitment;
     use super::HashCommitment;
     use super::SECURITY_BITS;
-    use cryptoxide::digest::Digest;
-    use cryptoxide::sha3::Sha3;
     use crate::curv::arithmetic::num_bigint::from;
     use crate::curv::arithmetic::num_bigint::BigInt;
     use crate::curv::arithmetic::traits::Converter;
     use crate::curv::arithmetic::traits::Samplable;
+    use cryptoxide::digest::Digest;
+    use cryptoxide::sha3::Sha3;
     use num_traits::{One, Zero};
 
     #[cfg(target_arch = "wasm32")]
