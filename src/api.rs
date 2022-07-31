@@ -279,7 +279,7 @@ pub async fn gg18_keygen(t: usize, n: usize, save_path: String) -> String {
 }
 
 #[wasm_bindgen]
-pub async fn gg18_sign(t: usize, n: usize, key_store: String,  message_str: String) {
+pub async fn gg18_sign(t: usize, n: usize, key_store: String,  message_str: String) -> String {
     let message = match hex::decode(message_str.clone()) {
         Ok(x) => x,
         Err(_e) => message_str.as_bytes().to_vec(),
@@ -767,7 +767,7 @@ pub async fn gg18_sign(t: usize, n: usize, key_store: String,  message_str: Stri
     .unwrap();
 
     //fs::write("signature".to_string(), sign_json).expect("Unable to save !");
-    
+    sign_json
 }
 
 fn format_vec_from_reads<'a, T: serde::Deserialize<'a> + Clone>(
