@@ -1,24 +1,21 @@
 const thsig = require("./pkg");
 
 var items = [
-  { idx: 0, save_path: "key.store" },
-  { idx: 1, save_path: "key1.store" },
-  { idx: 2, save_path: "key2.store" },
+  { idx: 0, save_path: "key1.store" },
+  { idx: 1, save_path: "key2.store" },
+  { idx: 2, save_path: "key3.store" },
 ];
 var results = [];
 
-async function keygen(m, arg) {
-  console.log("参数为 " + arg.idx + ":" + arg.save_path + " , 开始执行");
+let t = 1;
+let n = 3;
 
-  return await m.gg18_keygen(arg.idx, 3, arg.save_path);
+async function keygen(m, arg) {
+  return await m.gg18_keygen(t, n, arg.save_path);
 }
 
 async function sign(m, arg, key_store) {
-  return await m.gg18_sign(arg.idx, 3, key_store, "Hello Eigen");
-}
-
-function final(value) {
-  console.log("完成: ", value);
+  return await m.gg18_sign(t, n, key_store, "Hello Eigen");
 }
 
 thsig.then((m) => {
@@ -30,8 +27,11 @@ thsig.then((m) => {
     if (results.length == items.length) {
       console.log(results.length);
       items.forEach(async function (item) {
-        console.log(item.idx, " ", results[item.idx]);
-        res = await sign(m, item, results[item.idx]);
+        if (item.idx < t + 1) {
+          console.log(item.idx, " ", results[item.idx]);
+          res = await sign(m, item, results[item.idx]);
+          console.log("Sign result: ", res);
+        }
       });
     }
   });

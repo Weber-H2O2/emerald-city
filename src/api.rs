@@ -541,7 +541,7 @@ pub async fn gg18_sign(t: usize, n: usize, key_store: String,  message_str: Stri
         uuid.clone(),
     ).await;
 
-    console_log!("round4 is OK");
+    console_log!("round4 {}/{} is OK: {:?}", party_num_int, THRESHOLD + 1, round4_ans_vec);
 
     let mut decommit_vec: Vec<SignDecommitPhase1> = Vec::new();
     format_vec_from_reads(
