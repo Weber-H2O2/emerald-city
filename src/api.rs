@@ -47,7 +47,7 @@ pub async fn signup(client: &Client) -> Result<PartySignup, ()> {
 }
 
 #[wasm_bindgen]
-pub async fn gg18_keygen(t: usize, n: usize, save_path: String) -> String {
+pub async fn gg18_keygen(t: usize, n: usize) -> String {
     let client = reqwest::Client::new();
     //let delay = time::Duration::from_millis(25);
     let params = Parameters {
@@ -271,9 +271,8 @@ pub async fn gg18_keygen(t: usize, n: usize, save_path: String) -> String {
             paillier_key_vec,
             y_sum,
     )).unwrap();
-    console_log!("save {} to {}", keygen_json, save_path);
 
-    //fs::write(save_path, keygen_json).expect("Unable to save !");
+    console_log!("keygen_json: {} ", keygen_json);
 
     keygen_json
 }

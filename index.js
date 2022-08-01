@@ -1,17 +1,13 @@
 const thsig = require("./pkg");
 
-var items = [
-  { idx: 0, save_path: "key1.store" },
-  { idx: 1, save_path: "key2.store" },
-  { idx: 2, save_path: "key3.store" },
-];
+var items = [{ idx: 0 }, { idx: 1 }, { idx: 2 }];
 var results = [];
 
 let t = 1;
 let n = 3;
 
 async function keygen(m, arg) {
-  return await m.gg18_keygen(t, n, arg.save_path);
+  return await m.gg18_keygen(t, n);
 }
 
 async function sign(m, arg, key_store) {
