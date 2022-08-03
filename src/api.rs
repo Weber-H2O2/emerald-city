@@ -38,10 +38,7 @@ use crate::common::{
 
 pub async fn signup(client: &Client) -> Result<PartySignup, ()> {
     let key = "signup-keygen".to_string();
-
-
     let res_body = postb(client, "signupkeygen", key).await.unwrap();
-
     serde_json::from_str(&res_body).unwrap()
 }
 
