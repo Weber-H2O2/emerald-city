@@ -29,8 +29,7 @@ use crate::paillier::EncryptionKey;
 use sha2::Sha256;
 use std::{fs, time};
 
-use crate::log;
-use crate::console_log;
+
 
 use crate::common::{
     aes_decrypt, aes_encrypt, broadcast, poll_for_broadcasts, poll_for_p2p, postb, sendp2p, Params,
@@ -40,9 +39,9 @@ use crate::common::{
 pub async fn signup(client: &Client) -> Result<PartySignup, ()> {
     let key = "signup-keygen".to_string();
 
-    console_log!("key {}", key);
+
     let res_body = postb(client, "signupkeygen", key).await.unwrap();
-    console_log!("response body {}", res_body);
+
     serde_json::from_str(&res_body).unwrap()
 }
 
@@ -57,14 +56,14 @@ pub async fn gg18_keygen(t: usize, n: usize) -> String {
 
     let PARTIES = n.clone() as u16;
 
-    console_log!("signup");
+
     let (party_num_int, uuid) = match signup(&client).await.unwrap() {
         PartySignup {number, uuid} => (number, uuid),
     };
 
     let party_keys = Keys::create(party_num_int as usize);
     let (bc_i, decom_i) = party_keys.phase1_broadcast_phase3_proof_of_correct_key();
-    console_log!("broadcast");
+
     assert!(broadcast(
             &client,
             party_num_int,
@@ -73,7 +72,7 @@ pub async fn gg18_keygen(t: usize, n: usize) -> String {
             uuid.clone()
     ).await.is_ok());
 
-    console_log!("poll_for_broadcasts");
+
     let round1_ans_vec = poll_for_broadcasts(
         &client,
         party_num_int,
@@ -90,7 +89,7 @@ pub async fn gg18_keygen(t: usize, n: usize) -> String {
 
     bc1_vec.insert(party_num_int as usize - 1, bc_i);
 
-    console_log!("broadcast round 2");
+
     // send ephemeral public keys and check commitments correctness
     assert!(broadcast(
             &client,
@@ -99,7 +98,7 @@ pub async fn gg18_keygen(t: usize, n: usize) -> String {
             serde_json::to_string(&decom_i).unwrap(),
             uuid.clone()
     ).await.is_ok());
-    console_log!("poll_for_broadcasts round 2");
+
     let round2_ans_vec = poll_for_broadcasts(
         &client,
         party_num_int,
@@ -135,7 +134,7 @@ pub async fn gg18_keygen(t: usize, n: usize) -> String {
     let (head, tail) = point_vec.split_at(1);
     let y_sum = tail.iter().fold(head[0].clone(), |acc, x| acc + x);
 
-    console_log!("phase1_verify_com_phase3_verify_correct_key_phase2_distribute");
+
     let (vss_scheme, secret_shares, _index) = party_keys
         .phase1_verify_com_phase3_verify_correct_key_phase2_distribute(
             &params, &decom_vec, &bc1_vec,
@@ -163,7 +162,6 @@ pub async fn gg18_keygen(t: usize, n: usize) -> String {
         }
     }
 
-    console_log!("poll_for_p2p");
     let round3_ans_vec = poll_for_p2p(
         &client,
         party_num_int,
@@ -191,7 +189,6 @@ pub async fn gg18_keygen(t: usize, n: usize) -> String {
     }
 
     // round 4: send vss commitments
-    console_log!("broadcast round 4");
     assert!(broadcast(
             &client,
             party_num_int,
@@ -199,7 +196,6 @@ pub async fn gg18_keygen(t: usize, n: usize) -> String {
             serde_json::to_string(&vss_scheme).unwrap(),
             uuid.clone()
     ).await.is_ok());
-    console_log!("poll_for_broadcasts round 4");
     let round4_ans_vec = poll_for_broadcasts(
         &client,
         party_num_int,
@@ -222,7 +218,6 @@ pub async fn gg18_keygen(t: usize, n: usize) -> String {
         }
     }
 
-    console_log!("phase2_verify_vss_construct_keypair_phase3_pok_dlog");
     let (shared_keys, dlog_proof) = party_keys
         .phase2_verify_vss_construct_keypair_phase3_pok_dlog(
             &params,
@@ -272,7 +267,6 @@ pub async fn gg18_keygen(t: usize, n: usize) -> String {
             y_sum,
     )).unwrap();
 
-    console_log!("keygen_json: {} ", keygen_json);
 
     keygen_json
 }
@@ -290,7 +284,6 @@ pub async fn gg18_sign(t: usize, n: usize, key_store: String,  message_str: Stri
     // read key file
     //let data = fs::read_to_string(env::args().nth(2).unwrap())
     //    .expect("Unable to load keys, did you run keygen first? ");
-    console_log!("Begin read JSON");
     let (party_keys, shared_keys, party_id, vss_scheme_vec, paillier_key_vector, y_sum): (
         Keys,
         SharedKeys,
@@ -300,7 +293,6 @@ pub async fn gg18_sign(t: usize, n: usize, key_store: String,  message_str: Stri
         Point,
     ) = serde_json::from_str(&key_store).unwrap();
 
-    console_log!("Read JSON OK");
 
     let THRESHOLD = t as u16;
 
@@ -308,7 +300,6 @@ pub async fn gg18_sign(t: usize, n: usize, key_store: String,  message_str: Stri
     let (party_num_int, uuid) = match signup(&client).await.unwrap() {
         PartySignup { number, uuid } => (number, uuid),
     };
-    console_log!("number: {:?}, uuid: {:?}", party_num_int, uuid);
 
     // round 0: collect signers IDs
     assert!(broadcast(
@@ -448,7 +439,6 @@ pub async fn gg18_sign(t: usize, n: usize, key_store: String,  message_str: Stri
         uuid.clone(),
     ).await;
 
-    console_log!("round2 is OK");
 
     let mut m_b_gamma_rec_vec: Vec<MessageB> = Vec::new();
     let mut m_b_w_rec_vec: Vec<MessageB> = Vec::new();
@@ -519,7 +509,7 @@ pub async fn gg18_sign(t: usize, n: usize, key_store: String,  message_str: Stri
     let delta_inv = SignKeys::phase3_reconstruct_delta(&delta_vec);
 
     
-    console_log!("round3 is OK");
+
 
     //////////////////////////////////////////////////////////////////////////////
     // decommit to gamma_i
@@ -540,7 +530,6 @@ pub async fn gg18_sign(t: usize, n: usize, key_store: String,  message_str: Stri
         uuid.clone(),
     ).await;
 
-    console_log!("round4 {}/{} is OK: {:?}", party_num_int, THRESHOLD + 1, round4_ans_vec);
 
     let mut decommit_vec: Vec<SignDecommitPhase1> = Vec::new();
     format_vec_from_reads(
@@ -549,16 +538,15 @@ pub async fn gg18_sign(t: usize, n: usize, key_store: String,  message_str: Stri
         decommit,
         &mut decommit_vec,
     );
-    console_log!("format_vec_from_reads");
+
     let decomm_i = decommit_vec.remove(usize::from(party_num_int - 1));
     bc1_vec.remove(usize::from(party_num_int - 1));
     let b_proof_vec = (0..m_b_gamma_rec_vec.len())
         .map(|i| &m_b_gamma_rec_vec[i].b_proof)
         .collect::<Vec<&DLogProof>>();
-    console_log!("before phase4");
+
     let R = SignKeys::phase4(&delta_inv, &b_proof_vec, decommit_vec, &bc1_vec)
         .expect("bad gamma_i decommit");
-    console_log!("phase4");
 
     // adding local g_gamma_i
     let R = R + decomm_i.g_gamma_i * delta_inv;
@@ -567,11 +555,10 @@ pub async fn gg18_sign(t: usize, n: usize, key_store: String,  message_str: Stri
     let message_bn = BigInt::from_bytes_be(message);
     let local_sig =
         LocalSignature::phase5_local_sig(&sign_keys.k_i, &message_bn, &R, &sigma, &y_sum);
-    console_log!("phase5_local_sig");
+ 
 
     let (phase5_com, phase_5a_decom, helgamal_proof, dlog_proof_rho) =
         local_sig.phase5a_broadcast_5b_zkproof();
-    console_log!("phase5a_broadcast_5b_zkproof");
 
     //phase (5A)  broadcast commit
     assert!(broadcast(
@@ -590,9 +577,6 @@ pub async fn gg18_sign(t: usize, n: usize, key_store: String,  message_str: Stri
         "round5",
         uuid.clone(),
     ).await;
-    console_log!("poll_for_broadcasts");
-
-    console_log!("round5 is OK");
 
     let mut commit5a_vec: Vec<Phase5Com1> = Vec::new();
     format_vec_from_reads(
@@ -625,7 +609,7 @@ pub async fn gg18_sign(t: usize, n: usize, key_store: String,  message_str: Stri
         uuid.clone(),
     ).await;
 
-    console_log!("round6 is OK");
+
 
     let mut decommit5a_and_elgamal_and_dlog_vec: Vec<(
         Phase5ADecom1,
@@ -680,7 +664,7 @@ pub async fn gg18_sign(t: usize, n: usize, key_store: String,  message_str: Stri
         uuid.clone(),
     ).await;
 
-    console_log!("round7 is OK");
+
 
     let mut commit5c_vec: Vec<Phase5Com2> = Vec::new();
     format_vec_from_reads(

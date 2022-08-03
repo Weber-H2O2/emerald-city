@@ -114,8 +114,6 @@ where
 
     if let Ok(mut res) = res {
         return Some(res.text().await.unwrap())
-    } else {
-        crate::console_log!("res: {:?}", res);
     }
     None
 }

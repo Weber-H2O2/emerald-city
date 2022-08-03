@@ -38,9 +38,6 @@ use crate::curv::elliptic::curves::secp256_k1::{FE, GE};
 use crate::paillier::{Decrypt, RawCiphertext, RawPlaintext};
 use num_integer::Integer;
 
-use crate::console_log;
-use crate::log;
-
 const SECURITY: usize = 256;
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -419,7 +416,6 @@ impl SignKeys {
         //  g_gamma_i_vec: &Vec<GE>,
         bc1_vec: &Vec<SignBroadcastPhase1>,
     ) -> Result<GE, Error> {
-        crate::console_log!("419");
         let test_b_vec_and_com = (0..b_proof_vec.len())
             .map(|i| {
                 b_proof_vec[i].pk.get_element() == phase1_decommit_vec[i].g_gamma_i.get_element()
@@ -432,14 +428,12 @@ impl SignKeys {
             })
             .all(|x| x == true);
 
-        crate::console_log!("phase1_decommit_vecL.len(): {}", phase1_decommit_vec.len());
-
         let mut g_gamma_i_iter = phase1_decommit_vec.iter();
-        crate::console_log!("before unwrap");
+
         let head = g_gamma_i_iter.next().unwrap();
-        crate::console_log!("after head unwrap",);
+
         let tail = g_gamma_i_iter;
-        crate::console_log!("438");
+
         match test_b_vec_and_com {
             true => Ok({
                 let gamma_sum = tail.fold(head.g_gamma_i.clone(), |acc, x| acc + &x.g_gamma_i);
