@@ -33,6 +33,9 @@ struct GG18KeygenClient {
     params: Parameters,
     party_num_int: u16,
     uuid: String,
+    bc1_vec: Option<Vec<KeyGenBroadcastMessage1>>,
+    decom_i: Option<KeyGenDecommitMessage1>,
+    party_keys: Option<Keys>,
 }
 
 impl GG18KeygenClient {
@@ -53,10 +56,13 @@ impl GG18KeygenClient {
             params,
             party_num_int,
             uuid,
+            bc1_vec: None,
+            decom_i: None,
+            party_keys: None,
         }
     }
 
-    async fn round1(self) -> (Vec<KeyGenBroadcastMessage1>, KeyGenDecommitMessage1, Keys) {
+    async fn round1(&mut self) {
         let party_keys = Keys::create(self.party_num_int as usize);
         let (bc_i, decom_i) = party_keys.phase1_broadcast_phase3_proof_of_correct_key();
 
@@ -87,7 +93,8 @@ impl GG18KeygenClient {
 
         bc1_vec.insert(self.party_num_int as usize - 1, bc_i);
 
-        (bc1_vec, decom_i, party_keys)
+        self.bc1_vec = Some(bc1_vec);
+        self.party_keys = Some(party_keys);
     }
 
     async fn round2(
