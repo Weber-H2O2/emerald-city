@@ -36,6 +36,15 @@ struct GG18KeygenClient {
     bc1_vec: Option<Vec<KeyGenBroadcastMessage1>>,
     decom_i: Option<KeyGenDecommitMessage1>,
     party_keys: Option<Keys>,
+    y_sum: Option<crate::curv::elliptic::curves::secp256_k1::Secp256k1Point>,
+    vss_scheme: Option<VerifiableSS>,
+    secret_shares: Option<Vec<crate::curv::elliptic::curves::secp256_k1::Secp256k1Scalar>>,
+    enc_keys: Option<Vec<Vec<u8>>>,
+    party_shares: Option<Vec<Scalar>>,
+    point_vec: Option<Vec<Point>>,
+    dlog_proof: Option<DLogProof>,
+    shared_keys: Option<SharedKeys>,
+    vss_scheme_vec: Option<Vec<VerifiableSS>>,
 }
 
 impl GG18KeygenClient {
@@ -59,6 +68,15 @@ impl GG18KeygenClient {
             bc1_vec: None,
             decom_i: None,
             party_keys: None,
+            y_sum: None,
+            vss_scheme: None,
+            secret_shares: None,
+            enc_keys: None,
+            party_shares: None,
+            point_vec: None,
+            dlog_proof: None,
+            shared_keys: None,
+            vss_scheme_vec: None,
         }
     }
 
@@ -97,23 +115,13 @@ impl GG18KeygenClient {
         self.party_keys = Some(party_keys);
     }
 
-    async fn round2(
-        self,
-        bc1_vec: Vec<KeyGenBroadcastMessage1>,
-        decom_i: KeyGenDecommitMessage1,
-        party_keys: Keys,
-    ) -> (
-        crate::curv::elliptic::curves::secp256_k1::Secp256k1Point,
-        VerifiableSS,
-        Vec<crate::curv::elliptic::curves::secp256_k1::Secp256k1Scalar>,
-        Vec<Vec<u8>>,
-    ) {
+    async fn round2(&mut self) {
         // send ephemeral public keys and check commitments correctness
         assert!(broadcast(
             &self.client,
             self.party_num_int,
             "round2",
-            serde_json::to_string(&decom_i).unwrap(),
+            serde_json::to_string(&self.decom_i.as_ref().unwrap()).unwrap(),
             self.uuid.clone()
         )
         .await
@@ -134,16 +142,17 @@ impl GG18KeygenClient {
         let mut enc_keys: Vec<Vec<u8>> = Vec::new();
         for i in 1..=self.params.share_count as u16 {
             if i == self.party_num_int {
-                point_vec.push(decom_i.y_i.clone());
-                decom_vec.push(decom_i.clone());
+                point_vec.push(self.decom_i.as_ref().unwrap().y_i.clone());
+                decom_vec.push(self.decom_i.as_ref().unwrap().clone());
             } else {
                 let decom_j: KeyGenDecommitMessage1 =
                     serde_json::from_str(&round2_ans_vec[j]).unwrap();
                 point_vec.push(decom_j.y_i.clone());
                 decom_vec.push(decom_j.clone());
-                let key_bn: BigInt = (decom_j.y_i.clone() * party_keys.u_i.clone())
-                    .x_coor()
-                    .unwrap();
+                let key_bn: BigInt = (decom_j.y_i.clone()
+                    * self.party_keys.as_ref().unwrap().u_i.clone())
+                .x_coor()
+                .unwrap();
                 let key_bytes = BigInt::to_vec(&key_bn);
                 let mut template: Vec<u8> = vec![0u8; AES_KEY_BYTES_LEN - key_bytes.len()];
                 template.extend_from_slice(&key_bytes[..]);
@@ -155,28 +164,32 @@ impl GG18KeygenClient {
         let (head, tail) = point_vec.split_at(1);
         let y_sum = tail.iter().fold(head[0].clone(), |acc, x| acc + x);
 
-        let (vss_scheme, secret_shares, _index) = party_keys
+        let (vss_scheme, secret_shares, _index) = self
+            .party_keys
+            .as_ref()
+            .unwrap()
             .phase1_verify_com_phase3_verify_correct_key_phase2_distribute(
                 &self.params,
                 &decom_vec,
-                &bc1_vec,
+                &(self.bc1_vec.as_ref().unwrap()),
             )
             .expect("invalid key");
 
-        (y_sum, vss_scheme, secret_shares, enc_keys)
+        self.y_sum = Some(y_sum);
+        self.vss_scheme = Some(vss_scheme);
+        self.secret_shares = Some(secret_shares);
+        self.enc_keys = Some(enc_keys);
+        self.point_vec = Some(point_vec);
     }
 
-    async fn round3(
-        self,
-        secret_shares: Vec<crate::curv::elliptic::curves::secp256_k1::Secp256k1Scalar>,
-        enc_keys: Vec<Vec<u8>>,
-    ) {
+    async fn round3(&mut self) {
         let mut j = 0;
         for (k, i) in (1..=self.params.share_count as u16).enumerate() {
             if i != self.party_num_int {
                 // prepare encrypted ss for party i:
-                let key_i = &enc_keys[j];
-                let plaintext = BigInt::to_vec(&secret_shares[k].to_big_int());
+                let key_i = &self.enc_keys.as_ref().unwrap()[j];
+                let plaintext =
+                    BigInt::to_vec(&self.secret_shares.as_ref().unwrap()[k].to_big_int());
                 let aead_pack_i = aes_encrypt(key_i, &plaintext);
                 assert!(sendp2p(
                     &self.client,
@@ -205,10 +218,10 @@ impl GG18KeygenClient {
         let mut party_shares: Vec<Scalar> = Vec::new();
         for i in 1..=self.params.share_count as u16 {
             if i == self.party_num_int {
-                party_shares.push(secret_shares[(i - 1) as usize].clone());
+                party_shares.push(self.secret_shares.as_ref().unwrap()[(i - 1) as usize].clone());
             } else {
                 let aead_pack: AEAD = serde_json::from_str(&round3_ans_vec[j]).unwrap();
-                let key_i = &enc_keys[j];
+                let key_i = &self.enc_keys.as_ref().unwrap()[j];
                 let out = aes_decrypt(key_i, aead_pack);
                 let out_bn = BigInt::from_bytes_be(&out[..]);
                 let out_fe = ECScalar::from(&out_bn);
@@ -217,20 +230,16 @@ impl GG18KeygenClient {
                 j += 1;
             }
         }
+
+        self.party_shares = Some(party_shares);
     }
 
-    async fn round4(
-        self,
-        vss_scheme: VerifiableSS,
-        party_keys: Keys,
-        party_shares: Vec<Scalar>,
-        point_vec: Vec<Point>,
-    ) {
+    async fn round4(&mut self) {
         assert!(broadcast(
             &self.client,
             self.party_num_int,
             "round4",
-            serde_json::to_string(&vss_scheme).unwrap(),
+            serde_json::to_string(&self.vss_scheme.as_ref().unwrap()).unwrap(),
             self.uuid.clone()
         )
         .await
@@ -248,7 +257,7 @@ impl GG18KeygenClient {
         let mut vss_scheme_vec: Vec<VerifiableSS> = Vec::new();
         for i in 1..=self.params.share_count as u16 {
             if i == self.party_num_int {
-                vss_scheme_vec.push(vss_scheme.clone());
+                vss_scheme_vec.push(self.vss_scheme.as_ref().unwrap().clone());
             } else {
                 let vss_scheme_j: VerifiableSS = serde_json::from_str(&round4_ans_vec[j]).unwrap();
                 vss_scheme_vec.push(vss_scheme_j);
@@ -256,32 +265,30 @@ impl GG18KeygenClient {
             }
         }
 
-        let (shared_keys, dlog_proof) = party_keys
+        let (shared_keys, dlog_proof) = self
+            .party_keys
+            .as_ref()
+            .unwrap()
             .phase2_verify_vss_construct_keypair_phase3_pok_dlog(
                 &self.params,
-                &point_vec,
-                &party_shares,
+                &self.point_vec.as_ref().unwrap(),
+                &self.party_shares.as_ref().unwrap(),
                 &vss_scheme_vec,
                 &(self.party_num_int.clone() as usize), // FIXME
             )
             .expect("invalid vss");
+
+        self.shared_keys = Some(shared_keys);
+        self.dlog_proof = Some(dlog_proof);
+        self.vss_scheme_vec = Some(vss_scheme_vec);
     }
 
-    async fn round5(
-        self,
-        dlog_proof: DLogProof,
-        point_vec: Vec<Point>,
-        bc1_vec: Vec<KeyGenBroadcastMessage1>,
-        party_keys: Keys,
-        shared_keys: SharedKeys,
-        vss_scheme_vec: Vec<VerifiableSS>,
-        y_sum: crate::curv::elliptic::curves::secp256_k1::Secp256k1Point,
-    ) -> String {
+    async fn round5(&mut self) -> String {
         assert!(broadcast(
             &self.client,
             self.party_num_int,
             "round5",
-            serde_json::to_string(&dlog_proof).unwrap(),
+            serde_json::to_string(&self.dlog_proof.as_ref().unwrap()).unwrap(),
             self.uuid.clone()
         )
         .await
@@ -291,7 +298,7 @@ impl GG18KeygenClient {
             self.party_num_int,
             self.params.share_count as u16,
             "round5",
-            self.uuid,
+            self.uuid.clone(),
         )
         .await;
 
@@ -299,28 +306,32 @@ impl GG18KeygenClient {
         let mut dlog_proof_vec: Vec<DLogProof> = Vec::new();
         for i in 1..=self.params.share_count as u16 {
             if i == self.party_num_int {
-                dlog_proof_vec.push(dlog_proof.clone());
+                dlog_proof_vec.push(self.dlog_proof.as_ref().unwrap().clone());
             } else {
                 let dlog_proof_j: DLogProof = serde_json::from_str(&round5_ans_vec[j]).unwrap();
                 dlog_proof_vec.push(dlog_proof_j);
                 j += 1;
             }
         }
-        Keys::verify_dlog_proofs(&self.params, &dlog_proof_vec, &point_vec)
-            .expect("bad dlog proof");
+        Keys::verify_dlog_proofs(
+            &self.params,
+            &dlog_proof_vec,
+            &self.point_vec.as_ref().unwrap(),
+        )
+        .expect("bad dlog proof");
 
         //save key to file:
         let paillier_key_vec = (0..self.params.share_count as u16)
-            .map(|i| bc1_vec[i as usize].e.clone())
+            .map(|i| self.bc1_vec.as_ref().unwrap()[i as usize].e.clone())
             .collect::<Vec<EncryptionKey>>();
 
         let keygen_json = serde_json::to_string(&(
-            party_keys,
-            shared_keys,
+            self.party_keys.as_ref().unwrap(),
+            self.shared_keys.as_ref().unwrap(),
             self.party_num_int,
-            vss_scheme_vec,
+            self.vss_scheme_vec.as_ref().unwrap(),
             paillier_key_vec,
-            y_sum,
+            self.y_sum.as_ref().unwrap(),
         ))
         .unwrap();
 
