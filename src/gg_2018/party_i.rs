@@ -40,7 +40,7 @@ use num_integer::Integer;
 
 const SECURITY: usize = 256;
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Keys {
     pub u_i: FE,
     pub y_i: GE,
@@ -56,7 +56,7 @@ pub struct PartyPrivate {
     dk: DecryptionKey,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct KeyGenBroadcastMessage1 {
     pub e: EncryptionKey,
     pub com: BigInt,
@@ -69,13 +69,13 @@ pub struct KeyGenDecommitMessage1 {
     pub y_i: GE,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Parameters {
     pub threshold: usize,   //t
     pub share_count: usize, //n
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SharedKeys {
     pub y: GE,
     pub x_i: FE,
