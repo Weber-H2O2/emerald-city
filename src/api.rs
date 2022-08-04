@@ -28,7 +28,8 @@ use crate::paillier::EncryptionKey;
 use sha2::Sha256;
 use std::{fs, time};
 
-struct GG18KeygenClient {
+#[wasm_bindgen]
+pub struct GG18KeygenClient {
     client: Client,
     params: Parameters,
     party_num_int: u16,
@@ -47,8 +48,9 @@ struct GG18KeygenClient {
     vss_scheme_vec: Option<Vec<VerifiableSS>>,
 }
 
+#[wasm_bindgen]
 impl GG18KeygenClient {
-    async fn new(t: usize, n: usize) -> Self {
+    pub async fn new(t: usize, n: usize) -> Self {
         let client = reqwest::Client::new();
         //let delay = time::Duration::from_millis(25);
         let params = Parameters {
@@ -80,7 +82,7 @@ impl GG18KeygenClient {
         }
     }
 
-    async fn round1(&mut self) {
+    pub async fn round1(&mut self) {
         let party_keys = Keys::create(self.party_num_int as usize);
         let (bc_i, decom_i) = party_keys.phase1_broadcast_phase3_proof_of_correct_key();
 
@@ -115,7 +117,7 @@ impl GG18KeygenClient {
         self.party_keys = Some(party_keys);
     }
 
-    async fn round2(&mut self) {
+    pub async fn round2(&mut self) {
         // send ephemeral public keys and check commitments correctness
         assert!(broadcast(
             &self.client,
@@ -182,7 +184,7 @@ impl GG18KeygenClient {
         self.point_vec = Some(point_vec);
     }
 
-    async fn round3(&mut self) {
+    pub async fn round3(&mut self) {
         let mut j = 0;
         for (k, i) in (1..=self.params.share_count as u16).enumerate() {
             if i != self.party_num_int {
@@ -234,7 +236,7 @@ impl GG18KeygenClient {
         self.party_shares = Some(party_shares);
     }
 
-    async fn round4(&mut self) {
+    pub async fn round4(&mut self) {
         assert!(broadcast(
             &self.client,
             self.party_num_int,
@@ -283,7 +285,7 @@ impl GG18KeygenClient {
         self.vss_scheme_vec = Some(vss_scheme_vec);
     }
 
-    async fn round5(&mut self) -> String {
+    pub async fn round5(&mut self) -> String {
         assert!(broadcast(
             &self.client,
             self.party_num_int,
