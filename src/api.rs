@@ -629,6 +629,8 @@ pub struct GG18SignClientContext {
     signers_vec: Option<Vec<usize>>,
     round2_ans_vec: Option<Vec<String>>,
     xi_com_vec: Option<Vec<crate::curv::elliptic::curves::secp256_k1::Secp256k1Point>>,
+    beta_vec: Option<Vec<Scalar>>,
+    ni_vec: Option<Vec<Scalar>>,
 }
 
 pub async fn gg18_sign_new_context(
@@ -677,6 +679,8 @@ pub async fn gg18_sign_new_context(
         signers_vec: None,
         round2_ans_vec: None,
         xi_com_vec: None,
+        beta_vec: None,
+        ni_vec: None,
     })
     .unwrap()
 }
@@ -846,13 +850,14 @@ pub async fn gg18_sign_round2(context: String) -> String {
         &client,
         context.party_num_int,
         context.threshould + 1,
-        //delay,
         "round2",
         context.uuid.clone(),
     )
     .await;
 
     context.round2_ans_vec = Some(round2_ans_vec);
+    context.beta_vec = Some(beta_vec);
+    context.ni_vec = Some(ni_vec);
 
     serde_json::to_string(&context).unwrap()
 }
@@ -896,12 +901,12 @@ pub async fn gg18_sign_round3(context: String) -> String {
             alpha_vec.push(alpha_ij_gamma.0);
             miu_vec.push(alpha_ij_wi.0);
             let g_w_i = Keys::update_commitments_to_xi(
-                &context.xi_com_vec.unwrap()
-                    [usize::from(context.signers_vec.unwrap()[usize::from(i - 1)])],
+                &context.xi_com_vec.as_ref().unwrap()
+                    [usize::from(context.signers_vec.as_ref().unwrap()[usize::from(i - 1)])],
                 &context.vss_scheme_vec
-                    [usize::from(context.signers_vec.unwrap()[usize::from(i - 1)])],
-                context.signers_vec.unwrap()[usize::from(i - 1)],
-                &context.signers_vec.unwrap(),
+                    [usize::from(context.signers_vec.as_ref().unwrap()[usize::from(i - 1)])],
+                context.signers_vec.as_ref().unwrap()[usize::from(i - 1)],
+                &context.signers_vec.as_ref().unwrap(),
             );
             assert_eq!(m_b.b_proof.pk, g_w_i);
             j += 1;
@@ -910,9 +915,14 @@ pub async fn gg18_sign_round3(context: String) -> String {
     //////////////////////////////////////////////////////////////////////////////
     let delta_i = context
         .sign_keys
+        .as_ref()
         .unwrap()
-        .phase2_delta_i(&alpha_vec, &beta_vec);
-    let sigma = context.sign_keys.unwrap().phase2_sigma_i(&miu_vec, &ni_vec);
+        .phase2_delta_i(&alpha_vec, &context.beta_vec.as_ref().unwrap());
+    let sigma = context
+        .sign_keys
+        .as_ref()
+        .unwrap()
+        .phase2_sigma_i(&miu_vec, &context.ni_vec.as_ref().unwrap());
 
     assert!(broadcast(
         &client,
@@ -929,7 +939,7 @@ pub async fn gg18_sign_round3(context: String) -> String {
         context.threshould + 1,
         //delay,
         "round3",
-        uuid.clone(),
+        context.uuid.clone(),
     )
     .await;
     let mut delta_vec: Vec<Scalar> = Vec::new();
@@ -943,6 +953,7 @@ pub async fn gg18_sign_round3(context: String) -> String {
 
     serde_json::to_string(&context).unwrap()
 }
+
 pub async fn gg18_sign_round4() -> String {
     // decommit to gamma_i
     assert!(broadcast(
