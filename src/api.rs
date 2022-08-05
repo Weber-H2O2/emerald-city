@@ -627,6 +627,8 @@ pub struct GG18SignClientContext {
     decommit: Option<SignDecommitPhase1>,
     round1_ans_vec: Option<Vec<String>>,
     signers_vec: Option<Vec<usize>>,
+    round2_ans_vec: Option<Vec<String>>,
+    xi_com_vec: Option<Vec<crate::curv::elliptic::curves::secp256_k1::Secp256k1Point>>,
 }
 
 pub async fn gg18_sign_new_context(
@@ -673,6 +675,8 @@ pub async fn gg18_sign_new_context(
         decommit: None,
         round1_ans_vec: None,
         signers_vec: None,
+        round2_ans_vec: None,
+        xi_com_vec: None,
     })
     .unwrap()
 }
@@ -725,6 +729,7 @@ pub async fn gg18_sign_round0(context: String) -> String {
 
     context.sign_keys = Some(sign_keys);
     context.signers_vec = Some(signers_vec);
+    context.xi_com_vec = Some(xi_com_vec);
 
     serde_json::to_string(&context).unwrap()
 }
@@ -847,6 +852,8 @@ pub async fn gg18_sign_round2(context: String) -> String {
     )
     .await;
 
+    context.round2_ans_vec = Some(round2_ans_vec);
+
     serde_json::to_string(&context).unwrap()
 }
 
@@ -859,7 +866,7 @@ pub async fn gg18_sign_round3(context: String) -> String {
     for i in 0..context.threshould {
         //  if signers_vec.contains(&(i as usize)) {
         let (m_b_gamma_i, m_b_w_i): (MessageB, MessageB) =
-            serde_json::from_str(&round2_ans_vec[i as usize]).unwrap();
+            serde_json::from_str(&context.round2_ans_vec.as_ref().unwrap()[i as usize]).unwrap();
         m_b_gamma_rec_vec.push(m_b_gamma_i);
         m_b_w_rec_vec.push(m_b_w_i);
         //     }
@@ -874,34 +881,45 @@ pub async fn gg18_sign_round3(context: String) -> String {
             let m_b = m_b_gamma_rec_vec[j].clone();
 
             let alpha_ij_gamma = m_b
-                .verify_proofs_get_alpha(&party_keys.dk, &sign_keys.k_i)
+                .verify_proofs_get_alpha(
+                    &context.party_keys.dk,
+                    &context.sign_keys.as_ref().unwrap().k_i,
+                )
                 .expect("wrong dlog or m_b");
             let m_b = m_b_w_rec_vec[j].clone();
             let alpha_ij_wi = m_b
-                .verify_proofs_get_alpha(&party_keys.dk, &sign_keys.k_i)
+                .verify_proofs_get_alpha(
+                    &context.party_keys.dk,
+                    &context.sign_keys.as_ref().unwrap().k_i,
+                )
                 .expect("wrong dlog or m_b");
             alpha_vec.push(alpha_ij_gamma.0);
             miu_vec.push(alpha_ij_wi.0);
             let g_w_i = Keys::update_commitments_to_xi(
-                &xi_com_vec[usize::from(signers_vec[usize::from(i - 1)])],
-                &vss_scheme_vec[usize::from(signers_vec[usize::from(i - 1)])],
-                signers_vec[usize::from(i - 1)],
-                &signers_vec,
+                &context.xi_com_vec.unwrap()
+                    [usize::from(context.signers_vec.unwrap()[usize::from(i - 1)])],
+                &context.vss_scheme_vec
+                    [usize::from(context.signers_vec.unwrap()[usize::from(i - 1)])],
+                context.signers_vec.unwrap()[usize::from(i - 1)],
+                &context.signers_vec.unwrap(),
             );
             assert_eq!(m_b.b_proof.pk, g_w_i);
             j += 1;
         }
     }
     //////////////////////////////////////////////////////////////////////////////
-    let delta_i = sign_keys.phase2_delta_i(&alpha_vec, &beta_vec);
-    let sigma = sign_keys.phase2_sigma_i(&miu_vec, &ni_vec);
+    let delta_i = context
+        .sign_keys
+        .unwrap()
+        .phase2_delta_i(&alpha_vec, &beta_vec);
+    let sigma = context.sign_keys.unwrap().phase2_sigma_i(&miu_vec, &ni_vec);
 
     assert!(broadcast(
         &client,
         context.party_num_int,
         "round3",
         serde_json::to_string(&delta_i).unwrap(),
-        uuid.clone()
+        context.uuid.clone()
     )
     .await
     .is_ok());
