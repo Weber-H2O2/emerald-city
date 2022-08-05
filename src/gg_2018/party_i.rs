@@ -81,7 +81,7 @@ pub struct SharedKeys {
     pub x_i: FE,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct SignKeys {
     pub w_i: FE,
     pub g_w_i: GE,
@@ -90,18 +90,18 @@ pub struct SignKeys {
     pub g_gamma_i: GE,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct SignBroadcastPhase1 {
     pub com: BigInt,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct SignDecommitPhase1 {
     pub blind_factor: BigInt,
     pub g_gamma_i: GE,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct LocalSignature {
     pub l_i: FE,
     pub rho_i: FE,
