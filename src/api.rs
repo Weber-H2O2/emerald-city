@@ -631,6 +631,10 @@ pub struct GG18SignClientContext {
     xi_com_vec: Option<Vec<crate::curv::elliptic::curves::secp256_k1::Secp256k1Point>>,
     beta_vec: Option<Vec<Scalar>>,
     ni_vec: Option<Vec<Scalar>>,
+    bc1_vec: Option<Vec<SignBroadcastPhase1>>,
+    m_b_gamma_rec_vec: Option<Vec<MessageB>>,
+    delta_inv: Option<crate::curv::elliptic::curves::secp256_k1::Secp256k1Scalar>,
+    message: &[u8],
 }
 
 pub async fn gg18_sign_new_context(
@@ -681,6 +685,10 @@ pub async fn gg18_sign_new_context(
         xi_com_vec: None,
         beta_vec: None,
         ni_vec: None,
+        bc1_vec: None,
+        m_b_gamma_rec_vec: None,
+        delta_inv: None,
+        message, // TODO: The message is plain now
     })
     .unwrap()
 }
@@ -858,6 +866,7 @@ pub async fn gg18_sign_round2(context: String) -> String {
     context.round2_ans_vec = Some(round2_ans_vec);
     context.beta_vec = Some(beta_vec);
     context.ni_vec = Some(ni_vec);
+    context.bc1_vec = Some(bc1_vec);
 
     serde_json::to_string(&context).unwrap()
 }
@@ -951,17 +960,22 @@ pub async fn gg18_sign_round3(context: String) -> String {
     );
     let delta_inv = SignKeys::phase3_reconstruct_delta(&delta_vec);
 
+    context.m_b_gamma_rec_vec = Some(m_b_gamma_rec_vec);
+    context.delta_inv = Some(delta_inv);
+
     serde_json::to_string(&context).unwrap()
 }
 
-pub async fn gg18_sign_round4() -> String {
+pub async fn gg18_sign_round4(context: String) -> String {
+    let mut context = serde_json::from_str::<GG18SignClientContext>(&context).unwrap();
+    let client = Client::new();
     // decommit to gamma_i
     assert!(broadcast(
         &client,
         context.party_num_int,
         "round4",
-        serde_json::to_string(&decommit).unwrap(),
-        uuid.clone()
+        serde_json::to_string(&context.decommit.as_ref().unwrap()).unwrap(),
+        context.uuid.clone()
     )
     .await
     .is_ok());
@@ -971,7 +985,7 @@ pub async fn gg18_sign_round4() -> String {
         context.threshould + 1,
         //delay,
         "round4",
-        uuid.clone(),
+        context.uuid.clone(),
     )
     .await;
 
@@ -979,29 +993,44 @@ pub async fn gg18_sign_round4() -> String {
     format_vec_from_reads(
         &round4_ans_vec,
         context.party_num_int as usize,
-        decommit,
+        context.decommit.unwrap(),
         &mut decommit_vec,
     );
 
     let decomm_i = decommit_vec.remove(usize::from(context.party_num_int - 1));
-    bc1_vec.remove(usize::from(context.party_num_int - 1));
-    let b_proof_vec = (0..m_b_gamma_rec_vec.len())
-        .map(|i| &m_b_gamma_rec_vec[i].b_proof)
+    context
+        .bc1_vec
+        .unwrap()
+        .remove(usize::from(context.party_num_int - 1));
+    let b_proof_vec = (0..context.m_b_gamma_rec_vec.as_ref().unwrap().len())
+        .map(|i| &context.m_b_gamma_rec_vec.as_ref().unwrap()[i].b_proof)
         .collect::<Vec<&DLogProof>>();
 
-    let R = SignKeys::phase4(&delta_inv, &b_proof_vec, decommit_vec, &bc1_vec)
-        .expect("bad gamma_i decommit");
+    let R = SignKeys::phase4(
+        &context.delta_inv.as_ref().unwrap(),
+        &b_proof_vec,
+        decommit_vec,
+        &context.bc1_vec.as_ref().unwrap(),
+    )
+    .expect("bad gamma_i decommit");
 
     // adding local g_gamma_i
-    let R = R + decomm_i.g_gamma_i * delta_inv;
+    let R = R + decomm_i.g_gamma_i * context.delta_inv.as_ref().unwrap();
 
     // we assume the message is already hashed (by the signer).
-    let message_bn = BigInt::from_bytes_be(message);
-    let local_sig =
-        LocalSignature::phase5_local_sig(&sign_keys.k_i, &message_bn, &R, &sigma, &y_sum);
+    let message_bn = BigInt::from_bytes_be(context.message);
+    let local_sig = LocalSignature::phase5_local_sig(
+        &context.sign_keys.as_ref().unwrap().k_i,
+        &message_bn,
+        &R,
+        &sigma,
+        &context.y_sum,
+    );
 
     let (phase5_com, phase_5a_decom, helgamal_proof, dlog_proof_rho) =
         local_sig.phase5a_broadcast_5b_zkproof();
+
+    serde_json::to_string(&context).unwrap()
 }
 
 pub async fn gg18_sign_round5() -> String {
@@ -1011,7 +1040,7 @@ pub async fn gg18_sign_round5() -> String {
         context.party_num_int,
         "round5",
         serde_json::to_string(&phase5_com).unwrap(),
-        uuid.clone()
+        context.uuid.clone()
     )
     .await
     .is_ok());
@@ -1021,7 +1050,7 @@ pub async fn gg18_sign_round5() -> String {
         context.threshould + 1,
         //delay,
         "round5",
-        uuid.clone(),
+        context.uuid.clone(),
     )
     .await;
 
@@ -1046,7 +1075,7 @@ pub async fn gg18_sign_round6() -> String {
             dlog_proof_rho.clone()
         ))
         .unwrap(),
-        uuid.clone()
+        context.uuid.clone()
     )
     .await
     .is_ok());
@@ -1056,7 +1085,7 @@ pub async fn gg18_sign_round6() -> String {
         context.threshould + 1,
         //delay,
         "round6",
-        uuid.clone(),
+        context.uuid.clone(),
     )
     .await;
 
@@ -1100,7 +1129,7 @@ pub async fn gg18_sign_round7() -> String {
         context.party_num_int,
         "round7",
         serde_json::to_string(&phase5_com2).unwrap(),
-        uuid.clone()
+        context.uuid.clone()
     )
     .await
     .is_ok());
@@ -1110,7 +1139,7 @@ pub async fn gg18_sign_round7() -> String {
         context.threshould + 1,
         //delay,
         "round7",
-        uuid.clone(),
+        context.uuid.clone(),
     )
     .await;
 
@@ -1130,7 +1159,7 @@ pub async fn gg18_sign_round8() -> String {
         context.party_num_int,
         "round8",
         serde_json::to_string(&phase_5d_decom2).unwrap(),
-        uuid.clone()
+        context.uuid.clone()
     )
     .await
     .is_ok());
@@ -1140,7 +1169,7 @@ pub async fn gg18_sign_round8() -> String {
         THRESHOLD + 1,
         //delay,
         "round8",
-        uuid.clone(),
+        context.uuid.clone(),
     )
     .await;
 
