@@ -611,6 +611,7 @@ pub async fn gg18_keygen(t: usize, n: usize) -> String {
     keygen_json
 }
 
+#[wasm_bindgen]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GG18SignClientContext {
     party_keys: Keys,
@@ -652,6 +653,7 @@ pub struct GG18SignClientContext {
     commit5c_vec: Option<Vec<Phase5Com2>>,
 }
 
+#[wasm_bindgen]
 pub async fn gg18_sign_new_context(
     t: usize,
     n: usize,
@@ -775,6 +777,7 @@ pub async fn gg18_sign_round0(context: String) -> String {
     serde_json::to_string(&context).unwrap()
 }
 
+#[wasm_bindgen]
 pub async fn gg18_sign_round1(context: String) -> String {
     let mut context = serde_json::from_str::<GG18SignClientContext>(&context).unwrap();
     let client = Client::new();
@@ -809,6 +812,7 @@ pub async fn gg18_sign_round1(context: String) -> String {
     serde_json::to_string(&context).unwrap()
 }
 
+#[wasm_bindgen]
 pub async fn gg18_sign_round2(context: String) -> String {
     let mut context = serde_json::from_str::<GG18SignClientContext>(&context).unwrap();
     let client = Client::new();
@@ -900,6 +904,7 @@ pub async fn gg18_sign_round2(context: String) -> String {
     serde_json::to_string(&context).unwrap()
 }
 
+#[wasm_bindgen]
 pub async fn gg18_sign_round3(context: String) -> String {
     let mut context = serde_json::from_str::<GG18SignClientContext>(&context).unwrap();
     let client = Client::new();
@@ -996,6 +1001,7 @@ pub async fn gg18_sign_round3(context: String) -> String {
     serde_json::to_string(&context).unwrap()
 }
 
+#[wasm_bindgen]
 pub async fn gg18_sign_round4(context: String) -> String {
     let mut context = serde_json::from_str::<GG18SignClientContext>(&context).unwrap();
     let client = Client::new();
@@ -1023,13 +1029,14 @@ pub async fn gg18_sign_round4(context: String) -> String {
     format_vec_from_reads(
         &round4_ans_vec,
         context.party_num_int as usize,
-        context.decommit.unwrap(),
+        context.decommit.clone().unwrap(),
         &mut decommit_vec,
     );
 
     let decomm_i = decommit_vec.remove(usize::from(context.party_num_int - 1));
-    context
+    &context
         .bc1_vec
+        .as_mut()
         .unwrap()
         .remove(usize::from(context.party_num_int - 1));
     let b_proof_vec = (0..context.m_b_gamma_rec_vec.as_ref().unwrap().len())
@@ -1071,6 +1078,7 @@ pub async fn gg18_sign_round4(context: String) -> String {
     serde_json::to_string(&context).unwrap()
 }
 
+#[wasm_bindgen]
 pub async fn gg18_sign_round5(context: String) -> String {
     let mut context = serde_json::from_str::<GG18SignClientContext>(&context).unwrap();
     let client = Client::new();
@@ -1098,7 +1106,7 @@ pub async fn gg18_sign_round5(context: String) -> String {
     format_vec_from_reads(
         &round5_ans_vec,
         context.party_num_int as usize,
-        context.phase5_com.unwrap().clone(),
+        context.phase5_com.clone().unwrap(),
         &mut commit5a_vec,
     );
 
@@ -1107,6 +1115,7 @@ pub async fn gg18_sign_round5(context: String) -> String {
     serde_json::to_string(&context).unwrap()
 }
 
+#[wasm_bindgen]
 pub async fn gg18_sign_round6(context: String) -> String {
     let mut context = serde_json::from_str::<GG18SignClientContext>(&context).unwrap();
     let client = Client::new();
@@ -1142,8 +1151,8 @@ pub async fn gg18_sign_round6(context: String) -> String {
         context.party_num_int as usize,
         (
             context.phase_5a_decom.clone().unwrap(),
-            context.helgamal_proof.unwrap(),
-            context.dlog_proof_rho.unwrap(),
+            context.helgamal_proof.clone().unwrap(),
+            context.dlog_proof_rho.clone().unwrap(),
         ),
         &mut decommit5a_and_elgamal_and_dlog_vec,
     );
@@ -1152,6 +1161,7 @@ pub async fn gg18_sign_round6(context: String) -> String {
     decommit5a_and_elgamal_and_dlog_vec.remove(usize::from(context.party_num_int - 1));
     context
         .commit5a_vec
+        .as_mut()
         .unwrap()
         .remove(usize::from(context.party_num_int - 1));
     let phase_5a_decomm_vec = (0..context.threshould)
@@ -1165,6 +1175,7 @@ pub async fn gg18_sign_round6(context: String) -> String {
         .collect::<Vec<DLogProof>>();
     let (phase5_com2, phase_5d_decom2) = context
         .local_sig
+        .clone()
         .unwrap()
         .phase5c(
             &phase_5a_decomm_vec,
@@ -1184,6 +1195,7 @@ pub async fn gg18_sign_round6(context: String) -> String {
     serde_json::to_string(&context).unwrap()
 }
 
+#[wasm_bindgen]
 pub async fn gg18_sign_round7(context: String) -> String {
     let mut context = serde_json::from_str::<GG18SignClientContext>(&context).unwrap();
     let client = Client::new();
@@ -1211,7 +1223,7 @@ pub async fn gg18_sign_round7(context: String) -> String {
     format_vec_from_reads(
         &round7_ans_vec,
         context.party_num_int as usize,
-        context.phase5_com2.unwrap(),
+        context.phase5_com2.clone().unwrap(),
         &mut commit5c_vec,
     );
 
@@ -1220,6 +1232,7 @@ pub async fn gg18_sign_round7(context: String) -> String {
     serde_json::to_string(&context).unwrap()
 }
 
+#[wasm_bindgen]
 pub async fn gg18_sign_round8(context: String) -> String {
     let mut context = serde_json::from_str::<GG18SignClientContext>(&context).unwrap();
     let client = Client::new();
@@ -1237,7 +1250,6 @@ pub async fn gg18_sign_round8(context: String) -> String {
         &client,
         context.party_num_int,
         context.threshould + 1,
-        //delay,
         "round8",
         context.uuid.clone(),
     )
@@ -1247,7 +1259,7 @@ pub async fn gg18_sign_round8(context: String) -> String {
     format_vec_from_reads(
         &round8_ans_vec,
         context.party_num_int as usize,
-        context.phase_5d_decom2.unwrap(),
+        context.phase_5d_decom2.clone().unwrap(),
         &mut decommit5d_vec,
     );
 
@@ -1255,6 +1267,7 @@ pub async fn gg18_sign_round8(context: String) -> String {
         .map(|i| {
             context
                 .decommit5a_and_elgamal_and_dlog_vec_includes_i
+                .clone()
                 .unwrap()[i as usize]
                 .0
                 .clone()
@@ -1262,6 +1275,7 @@ pub async fn gg18_sign_round8(context: String) -> String {
         .collect::<Vec<Phase5ADecom1>>();
     let s_i = context
         .local_sig
+        .clone()
         .unwrap()
         .phase5d(
             &decommit5d_vec,
@@ -1275,7 +1289,8 @@ pub async fn gg18_sign_round8(context: String) -> String {
     serde_json::to_string(&context).unwrap()
 }
 
-pub async fn gg18_sign_round9() -> String {
+#[wasm_bindgen]
+pub async fn gg18_sign_round9(context: String) -> String {
     let mut context = serde_json::from_str::<GG18SignClientContext>(&context).unwrap();
     let client = Client::new();
     //////////////////////////////////////////////////////////////////////////////
