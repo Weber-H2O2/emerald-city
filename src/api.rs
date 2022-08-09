@@ -137,8 +137,6 @@ pub async fn gg18_keygen_client_round2(context: String) -> String {
     .await
     .is_ok());
 
-    crate::console_log!("138");
-
     let round2_ans_vec = poll_for_broadcasts(
         &client,
         context.party_num_int,
@@ -147,8 +145,6 @@ pub async fn gg18_keygen_client_round2(context: String) -> String {
         context.uuid.clone(),
     )
     .await;
-
-    crate::console_log!("148");
 
     let mut j = 0;
     let mut point_vec: Vec<Point> = Vec::new();
@@ -187,8 +183,6 @@ pub async fn gg18_keygen_client_round2(context: String) -> String {
             &(context.bc1_vec.as_ref().unwrap()),
         )
         .expect("invalid key");
-
-    crate::console_log!("189");
 
     context.y_sum = Some(y_sum);
     context.vss_scheme = Some(vss_scheme);
@@ -730,7 +724,7 @@ pub async fn gg18_sign_client_new_context(
     .unwrap()
 }
 
-pub async fn gg18_sign_round0(context: String) -> String {
+pub async fn gg18_sign_client_round0(context: String) -> String {
     let mut context = serde_json::from_str::<GG18SignClientContext>(&context).unwrap();
     let client = Client::new();
     // round 0: collect signers IDs
@@ -784,7 +778,7 @@ pub async fn gg18_sign_round0(context: String) -> String {
 }
 
 #[wasm_bindgen]
-pub async fn gg18_sign_round1(context: String) -> String {
+pub async fn gg18_sign_client_round1(context: String) -> String {
     let mut context = serde_json::from_str::<GG18SignClientContext>(&context).unwrap();
     let client = Client::new();
     let (com, decommit) = context.sign_keys.as_ref().unwrap().phase1_broadcast();
@@ -819,7 +813,7 @@ pub async fn gg18_sign_round1(context: String) -> String {
 }
 
 #[wasm_bindgen]
-pub async fn gg18_sign_round2(context: String) -> String {
+pub async fn gg18_sign_client_round2(context: String) -> String {
     let mut context = serde_json::from_str::<GG18SignClientContext>(&context).unwrap();
     let client = Client::new();
     let mut j = 0;
@@ -911,7 +905,7 @@ pub async fn gg18_sign_round2(context: String) -> String {
 }
 
 #[wasm_bindgen]
-pub async fn gg18_sign_round3(context: String) -> String {
+pub async fn gg18_sign_client_round3(context: String) -> String {
     let mut context = serde_json::from_str::<GG18SignClientContext>(&context).unwrap();
     let client = Client::new();
     let mut m_b_gamma_rec_vec: Vec<MessageB> = Vec::new();
@@ -1008,7 +1002,7 @@ pub async fn gg18_sign_round3(context: String) -> String {
 }
 
 #[wasm_bindgen]
-pub async fn gg18_sign_round4(context: String) -> String {
+pub async fn gg18_sign_client_round4(context: String) -> String {
     let mut context = serde_json::from_str::<GG18SignClientContext>(&context).unwrap();
     let client = Client::new();
     // decommit to gamma_i
@@ -1085,7 +1079,7 @@ pub async fn gg18_sign_round4(context: String) -> String {
 }
 
 #[wasm_bindgen]
-pub async fn gg18_sign_round5(context: String) -> String {
+pub async fn gg18_sign_client_round5(context: String) -> String {
     let mut context = serde_json::from_str::<GG18SignClientContext>(&context).unwrap();
     let client = Client::new();
     //phase (5A)  broadcast commit
@@ -1122,7 +1116,7 @@ pub async fn gg18_sign_round5(context: String) -> String {
 }
 
 #[wasm_bindgen]
-pub async fn gg18_sign_round6(context: String) -> String {
+pub async fn gg18_sign_client_round6(context: String) -> String {
     let mut context = serde_json::from_str::<GG18SignClientContext>(&context).unwrap();
     let client = Client::new();
     //phase (5B)  broadcast decommit and (5B) ZK proof
@@ -1202,7 +1196,7 @@ pub async fn gg18_sign_round6(context: String) -> String {
 }
 
 #[wasm_bindgen]
-pub async fn gg18_sign_round7(context: String) -> String {
+pub async fn gg18_sign_client_round7(context: String) -> String {
     let mut context = serde_json::from_str::<GG18SignClientContext>(&context).unwrap();
     let client = Client::new();
     //////////////////////////////////////////////////////////////////////////////
@@ -1239,7 +1233,7 @@ pub async fn gg18_sign_round7(context: String) -> String {
 }
 
 #[wasm_bindgen]
-pub async fn gg18_sign_round8(context: String) -> String {
+pub async fn gg18_sign_client_round8(context: String) -> String {
     let mut context = serde_json::from_str::<GG18SignClientContext>(&context).unwrap();
     let client = Client::new();
     //phase (5B)  broadcast decommit and (5B) ZK proof
@@ -1296,7 +1290,7 @@ pub async fn gg18_sign_round8(context: String) -> String {
 }
 
 #[wasm_bindgen]
-pub async fn gg18_sign_round9(context: String) -> String {
+pub async fn gg18_sign_client_round9(context: String) -> String {
     let mut context = serde_json::from_str::<GG18SignClientContext>(&context).unwrap();
     let client = Client::new();
     //////////////////////////////////////////////////////////////////////////////
