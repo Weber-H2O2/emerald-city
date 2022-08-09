@@ -808,6 +808,7 @@ pub async fn gg18_sign_client_round1(context: String) -> String {
     .await;
 
     context.com = Some(com);
+    context.decommit = Some(decommit);
     context.round1_ans_vec = Some(round1_ans_vec);
 
     serde_json::to_string(&context).unwrap()
