@@ -32,6 +32,8 @@ async function sign(m, arg, key_store) {
     "Hello Eigen"
   );
   console.log("sign new context: ", context);
+  context = await m.gg18_sign_client_round0(context);
+  console.log("sign round0: ", context);
   context = await m.gg18_sign_client_round1(context);
   console.log("sign round1: ", context);
   context = await m.gg18_sign_client_round2(context);

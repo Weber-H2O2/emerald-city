@@ -724,6 +724,7 @@ pub async fn gg18_sign_client_new_context(
     .unwrap()
 }
 
+#[wasm_bindgen]
 pub async fn gg18_sign_client_round0(context: String) -> String {
     let mut context = serde_json::from_str::<GG18SignClientContext>(&context).unwrap();
     let client = Client::new();
