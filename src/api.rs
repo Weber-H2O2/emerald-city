@@ -1,5 +1,6 @@
 #![cfg(target_arch = "wasm32")]
 
+use crate::log;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
@@ -116,6 +117,7 @@ pub async fn gg18_keygen_client_round1(context: String) -> String {
 
     context.bc1_vec = Some(bc1_vec);
     context.party_keys = Some(party_keys);
+    context.decom_i = Some(decom_i);
 
     serde_json::to_string(&context).unwrap()
 }
@@ -135,6 +137,8 @@ pub async fn gg18_keygen_client_round2(context: String) -> String {
     .await
     .is_ok());
 
+    crate::console_log!("138");
+
     let round2_ans_vec = poll_for_broadcasts(
         &client,
         context.party_num_int,
@@ -143,6 +147,8 @@ pub async fn gg18_keygen_client_round2(context: String) -> String {
         context.uuid.clone(),
     )
     .await;
+
+    crate::console_log!("148");
 
     let mut j = 0;
     let mut point_vec: Vec<Point> = Vec::new();
@@ -181,6 +187,8 @@ pub async fn gg18_keygen_client_round2(context: String) -> String {
             &(context.bc1_vec.as_ref().unwrap()),
         )
         .expect("invalid key");
+
+    crate::console_log!("189");
 
     context.y_sum = Some(y_sum);
     context.vss_scheme = Some(vss_scheme);
