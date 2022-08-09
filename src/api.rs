@@ -48,7 +48,7 @@ pub struct GG18KeygenClientContext {
 }
 
 #[wasm_bindgen]
-pub async fn gg18_keygen_client_context(t: usize, n: usize) -> String {
+pub async fn gg18_keygen_client_new_context(t: usize, n: usize) -> String {
     let client = reqwest::Client::new();
     //let delay = time::Duration::from_millis(25);
     let params = Parameters {
@@ -654,7 +654,7 @@ pub struct GG18SignClientContext {
 }
 
 #[wasm_bindgen]
-pub async fn gg18_sign_new_context(
+pub async fn gg18_sign_client_new_context(
     t: usize,
     n: usize,
     key_store: String,
@@ -675,8 +675,6 @@ pub async fn gg18_sign_new_context(
         Vec<EncryptionKey>,
         Point,
     ) = serde_json::from_str(&key_store).unwrap();
-
-    let THRESHOLD = t as u16;
 
     //signup:
     let (party_num_int, uuid) = match signup(&client).await.unwrap() {
